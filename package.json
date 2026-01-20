@@ -1,12 +1,14 @@
 {
   "name": "fiber-photo-mode",
   "version": "0.1.0",
-  "author": "Łukasz Kwas",
+  "author": "Łukasz Kwas (https://github.com/kvvasuu)",
   "description": "A React Three Fiber component to add photo mode functionality to your 3D scenes.",
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
   "files": [
     "dist"
@@ -17,12 +19,15 @@
     "react-three-fiber",
     "photomode"
   ],
-  "homepage": "https://sonner.emilkowal.ski/",
+  "bugs": {
+    "url": "https://github.com/kvvasuu/fiber-photo-mode/issues"
+  },
+  "homepage": "https://github.com/kvvasuu/fiber-photo-mode#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/emilkowalski/sonner.git"
+    "url": "git+https://github.com/kvvasuu/fiber-photo-mode.git"
   },
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@react-three/postprocessing": "^3.0.4",
     "postprocessing": "^6.38.2",

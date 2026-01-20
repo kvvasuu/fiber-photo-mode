@@ -180,8 +180,6 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
   // Create render target for this screenshot
   const fbo = createRenderTarget(gl, width, height);
 
-  console.log(width, height, renderState.prevPixelRatio);
-
   // Ensure pixel ratio is 1 for consistent results
   gl.setPixelRatio(1);
 
