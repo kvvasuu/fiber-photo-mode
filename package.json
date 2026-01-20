@@ -1,0 +1,41 @@
+{
+  "name": "fiber-photo-mode",
+  "version": "0.1.0",
+  "author": "Łukasz Kwas",
+  "description": "A React Three Fiber component to add photo mode functionality to your 3D scenes.",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "react",
+    "threejs",
+    "react-three-fiber",
+    "photomode"
+  ],
+  "homepage": "https://sonner.emilkowal.ski/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emilkowalski/sonner.git"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "@react-three/postprocessing": "^3.0.4",
+    "postprocessing": "^6.38.2",
+    "zustand": "^5.0.10"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.9",
+    "@types/three": "^0.182.0",
+    "typescript": "^5.0.4"
+  },
+  "peerDependencies": {
+    "@react-three/fiber": "^9.0.0",
+    "react": "^19.0",
+    "three": ">=0.182.0"
+  }
+}
