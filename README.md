@@ -1,7 +1,6 @@
 # React Fiber Photo Mode
 
-[![CI](https://github.com/pmndrs/postprocessing/actions/workflows/ci.yml/badge.svg)](https://github.com/pmndrs/postprocessing/actions/workflows/ci.yml)
-[![Version](https://badgen.net/npm/v/postprocessing?color=green)](https://www.npmjs.com/package/postprocessing)
+[![Version](https://badgen.net/npm/v/fiber-photo-mode)](https://www.npmjs.com/package/fiber-photo-mode)
 
 PhotoMode / screenshot capture system for [React Three Fiber](https://github.com/pmndrs/react-three-fiber).
 
@@ -25,7 +24,7 @@ While it’s technically possible to capture directly from the canvas, fiber-cap
 
 ## Usage
 
-Insert <PhotoMode /> into your <Canvas> and call a hook to capture screenshots anywhere in your app.
+Insert `<PhotoMode />` into your `<Canvas>` and call a hook to capture screenshots anywhere in your app.
 
 ```js
 import { Canvas } from "@react-three/fiber";
@@ -54,7 +53,7 @@ const MyComponent = () => {
 };
 ```
 
-⚠️ Important: If you are using EffectComposer from @react-three/postprocessing for post-processing, replace it with <PhotoModeComposer> to ensure the screenshot captures all effects correctly.
+⚠️ Important: If you are using EffectComposer from @react-three/postprocessing for post-processing, replace it with `<PhotoModeComposer>` to ensure the screenshot captures all effects correctly.
 
 ```js
 import { PhotoModeComposer } from "fiber-photo-mode";
@@ -75,7 +74,7 @@ function Postprocessing() {
 - Supports FBO and post-processing via PhotoModeComposer
 - Capture at custom resolutions, independent of canvas size or pixel ratio
 - Easy-to-use hook for calling screenshots from anywhere in your app
-- Compatible with post-processing pipelines when using <PhotoModeComposer>
+- Compatible with post-processing pipelines when using `<PhotoModeComposer>`
 
 ## License
 
