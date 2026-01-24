@@ -4,6 +4,6 @@
  */
 
 export { PhotoMode } from "./engine/PhotoMode";
-export { PhotoModeComposer } from "./engine/PhotoModeComposer";
 export { usePhotoMode } from "./hooks/usePhotoMode";
+export { usePhotoModeEffects } from "./hooks/usePhotoModeEffects";
 export * from "./types";
