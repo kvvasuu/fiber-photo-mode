@@ -52,7 +52,7 @@ const equalityFn = <T>(a: T, b: T) => a === b;
  */
 export const usePhotoModeStore = createWithEqualityFn<PhotoModeInternalStore>(
   (set) => ({
-    photoModeOn: true,
+    photoModeOn: false,
 
     renderer: undefined,
     scene: undefined,
