@@ -6,10 +6,11 @@ import {
   Texture,
   UnsignedByteType,
   Vector2,
+  Vector3,
   WebGLRenderer,
   WebGLRenderTarget,
 } from "three";
-import { EffectKey, TakeScreenshotFn } from "../types";
+import { EffectKey, SphericalCameraControls, TakeScreenshotFn, UserControlsSnapshot } from "../types";
 import { CapturePass } from "./CapturePass";
 import { EFFECT_DEFINITIONS } from "./constants";
 
@@ -251,4 +252,78 @@ export function mapEffectValue(normalizedValue: number, effectKey: EffectKey): n
 
   // Round to 3 decimal places
   return Math.round(mapped * 1000) / 1000;
+}
+
+/**
+ * Checks whether the provided controls object is compatible with
+ * orbit-like (spherical) camera controls.
+ *
+ * This is a type guard that allows TypeScript to narrow `controls`
+ * to `SphericalCameraControls` when true.
+ *
+ * @param c - Any object that might implement orbit-like controls
+ * @returns True if the object has the minimal API required for snapshots
+ */
+export function isSphericalControls(c: any): c is SphericalCameraControls {
+  return (
+    c &&
+    typeof c.getDistance === "function" &&
+    typeof c.getAzimuthalAngle === "function" &&
+    typeof c.getPolarAngle === "function" &&
+    c.target?.isVector3 &&
+    c.object?.position?.isVector3
+  );
+}
+
+/**
+ * Creates a snapshot of a given orbit-like camera controls object.
+ *
+ * The snapshot contains only serializable data necessary to restore
+ * the camera state later. Returns null if the controls are not compatible.
+ *
+ * @param c - Controls object (e.g., OrbitControls, CameraControls)
+ * @returns A `UserControlsSnapshot` object or null if not compatible
+ */
+export function makeControlsSnapshot(c: any): UserControlsSnapshot | null {
+  if (!isSphericalControls(c)) return null;
+
+  return {
+    enabled: c.enabled,
+    position: c.object.position.clone(), // world-space position
+    target: c.target.clone(), // look-at target
+    zoom: c.object.zoom, // camera zoom factor
+    spherical: {
+      radius: c.getDistance(), // distance from target
+      theta: c.getAzimuthalAngle(), // horizontal angle
+      phi: c.getPolarAngle(), // vertical angle
+    },
+  };
+}
+
+/**
+ * Restores a previously saved controls snapshot onto a given controls object.
+ *
+ * Moves the camera to the snapshot position, sets the target, zoom, and
+ * updates the projection matrix and internal state of the controls.
+ * Does nothing if either snapshot is null or controls are incompatible.
+ *
+ * @param controls - The orbit-like camera controls object to restore
+ * @param snap - Snapshot data to apply
+ */
+export function restoreControlsSnapshot(controls: any, snap: UserControlsSnapshot | null) {
+  if (!snap || !isSphericalControls(controls)) return;
+
+  // Restore enabled state and look-at target
+  controls.enabled = snap.enabled;
+  controls.target.copy(snap.target);
+
+  // Convert spherical coordinates to Cartesian offset and apply to camera
+  const offset = new Vector3().setFromSphericalCoords(snap.spherical.radius, snap.spherical.phi, snap.spherical.theta);
+
+  controls.object.position.copy(snap.target).add(offset);
+  controls.object.zoom = snap.zoom;
+  controls.object.updateProjectionMatrix();
+
+  // Update controls internal state (required by OrbitControls and similar)
+  controls.update();
 }

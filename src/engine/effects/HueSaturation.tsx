@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 
 import { HueSaturationEffect } from "postprocessing";
-import { usePhotoModeEffectsStore } from "../../store/photoModeEffectsStore";
-import { usePhotoModeStore } from "../../store/photoModeStore";
+import { usePhotoModeEffectsStore } from "../../store/EffectsStore";
+import { usePhotoModeStore } from "../../store/PhotoModeStore";
 import { mapEffectValue } from "../../utils/functions";
 
 export function HueSaturation({ effect }: { effect: HueSaturationEffect }) {
