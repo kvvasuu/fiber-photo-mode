@@ -4,7 +4,7 @@
  * Only returns properties for enabled effects (others return undefined)
  */
 
-import { usePhotoModeEffectsStore } from "../store/photoModeEffectsStore";
+import { usePhotoModeEffectsStore } from "../store/EffectsStore";
 import type { EffectKey } from "../types";
 
 /**

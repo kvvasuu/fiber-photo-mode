@@ -9,8 +9,8 @@ import {
 } from "postprocessing";
 import { useEffect, useRef } from "react";
 import { Vector2 } from "three";
-import { usePhotoModeEffectsStore } from "../store/photoModeEffectsStore";
-import { usePhotoModeStore } from "../store/photoModeStore";
+import { usePhotoModeEffectsStore } from "../store/EffectsStore";
+import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { Bloom } from "./effects/Bloom";
 import { BrightnessContrast } from "./effects/BrightnessContrast";
 import { ChromaticAberration } from "./effects/ChromaticAberration";

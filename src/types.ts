@@ -1,6 +1,6 @@
 import { Camera } from "@react-three/fiber";
 import { EffectComposer } from "postprocessing";
-import { Scene, WebGLRenderer } from "three";
+import { EventDispatcher, Scene, Vector3, WebGLRenderer } from "three";
 
 /**
  * Configuration options for screenshot capture
@@ -58,4 +58,32 @@ export type EffectDefinition = {
   default: number;
   effectMin?: number;
   effectMax?: number;
+};
+
+export interface SphericalCameraControls {
+  enabled: boolean;
+  target: Vector3;
+  object: {
+    position: Vector3;
+    zoom: number;
+    updateProjectionMatrix(): void;
+  };
+
+  getDistance(): number;
+  getAzimuthalAngle(): number;
+  getPolarAngle(): number;
+
+  update(): void;
+}
+
+export type UserControlsSnapshot = Partial<EventDispatcher> & {
+  enabled: boolean;
+  target: Vector3;
+  position: Vector3;
+  zoom: number;
+  spherical: {
+    radius: number;
+    theta: number;
+    phi: number;
+  };
 };
