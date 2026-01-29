@@ -1,6 +1,6 @@
-import { useThree } from "@react-three/fiber";
+import { Camera, useThree } from "@react-three/fiber";
 import { useLayoutEffect, useRef } from "react";
-import { Camera, PerspectiveCamera } from "three";
+import { PerspectiveCamera } from "three";
 import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { UserControlsSnapshot } from "../types";
 import { isSphericalControls, makeControlsSnapshot, restoreControlsSnapshot } from "../utils/functions";
@@ -12,9 +12,10 @@ import PhotoModeControls from "./PhotoModeControls";
  * Handles switching between the user's users camera and a dedicated
  * Photo Mode camera. It also manages snapshotting and restoring user controls when entering/exiting Photo Mode.
  */
-export default function CameraController() {
+export function CameraController<T = unknown>({ controlsRef }: { controlsRef?: React.RefObject<T | null> }) {
   // Raw controls from R3F, could be undefined or any kind of controls
-  const userControls = useThree((s) => s.controls);
+  const threeControls = useThree((s) => s.controls);
+  const userControls = controlsRef?.current || threeControls;
 
   // Only accept "spherical" camera controls compatible with orbit-like snapshots
   const controls = isSphericalControls(userControls) ? userControls : undefined;
@@ -87,7 +88,7 @@ export default function CameraController() {
 
       // Restore original users camera
       if (usersCameraRef.current) {
-        set({ camera: usersCameraRef.current as PerspectiveCamera });
+        set({ camera: usersCameraRef.current });
       }
 
       // Clear Photo Mode camera reference

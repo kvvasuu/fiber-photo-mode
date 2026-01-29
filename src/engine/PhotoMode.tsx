@@ -4,7 +4,6 @@ import { usePhotoModeEffectsStore } from "../store/EffectsStore";
 import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { EffectName } from "../types";
 import { takeScreenshot } from "../utils/functions";
-import CameraController from "./CameraController";
 import { PhotoModeComposer } from "./Composer";
 
 /**
@@ -45,10 +44,5 @@ export function PhotoMode({ children, enabledEffects }: PhotoModeProps) {
       });
   }, [enabledEffects]);
 
-  return (
-    <>
-      <PhotoModeComposer>{children}</PhotoModeComposer>;
-      <CameraController />
-    </>
-  );
+  return <PhotoModeComposer>{children}</PhotoModeComposer>;
 }
