@@ -1,7 +1,7 @@
 import type { EffectComposerProps } from "@react-three/postprocessing";
 import { EffectComposer } from "@react-three/postprocessing";
 import { EffectComposer as EffectComposerImpl } from "postprocessing";
-import { forwardRef } from "react";
+import { forwardRef, ReactNode } from "react";
 import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { PhotoModeEffects } from "./Effects";
 
@@ -9,7 +9,7 @@ import { PhotoModeEffects } from "./Effects";
  * Props for PhotoModeComposer
  */
 type PhotoModeComposerProps = Omit<EffectComposerProps, "children"> & {
-  children?: React.ReactNode;
+  children?: ReactNode;
   enableBloom?: boolean;
 };
 

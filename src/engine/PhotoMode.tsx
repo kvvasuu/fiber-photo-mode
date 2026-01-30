@@ -1,5 +1,6 @@
 import { useThree } from "@react-three/fiber";
-import { useLayoutEffect } from "react";
+import { EffectComposerProps } from "@react-three/postprocessing";
+import { ReactNode, useLayoutEffect } from "react";
 import { usePhotoModeEffectsStore } from "../store/EffectsStore";
 import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { EffectName } from "../types";
@@ -12,15 +13,19 @@ import { PhotoModeComposer } from "./Composer";
  * Must be placed inside <Canvas> component
  */
 
-interface PhotoModeProps {
-  children?: React.ReactNode;
+type PhotoModeProps = Omit<EffectComposerProps, "children"> & {
   enabledEffects?: Partial<Record<EffectName, boolean>>;
-}
-export function PhotoMode({ children, enabledEffects }: PhotoModeProps) {
+  disableEvents?: boolean;
+  children?: ReactNode;
+};
+export function PhotoMode({ children, enabledEffects, disableEvents = true, ...props }: PhotoModeProps) {
   const gl = useThree((state) => state.gl);
   const scene = useThree((state) => state.scene);
   const camera = useThree((state) => state.camera);
+  const events = useThree((state) => state.events);
+
   const composer = usePhotoModeStore((state) => state.composer);
+  const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
 
   const setRenderer = usePhotoModeStore((state) => state.setRenderer);
   const setScene = usePhotoModeStore((state) => state.setScene);
@@ -44,5 +49,19 @@ export function PhotoMode({ children, enabledEffects }: PhotoModeProps) {
       });
   }, [enabledEffects]);
 
-  return <PhotoModeComposer>{children}</PhotoModeComposer>;
+  useLayoutEffect(() => {
+    if (!events) return;
+
+    const prev = events.enabled;
+
+    if (photoModeOn) {
+      events.enabled = !disableEvents;
+    }
+
+    return () => {
+      events.enabled = prev;
+    };
+  }, [photoModeOn, disableEvents, events]);
+
+  return <PhotoModeComposer {...props}>{children}</PhotoModeComposer>;
 }
