@@ -66,7 +66,7 @@ The `takeScreenshot` function accepts optional configuration:
 const file = await takeScreenshot({
   width: 1920, // Custom width (default: canvas width)
   height: 1080, // Custom height (default: canvas height)
-  format: "png", // 'jpeg' | 'png' | 'webp' | 'avif' (default: 'png')
+  format: "jpeg", // 'jpeg' | 'png' | 'webp' | 'avif' (default: 'jpeg')
   quality: 0.95, // Compression quality 0-1 (default: 0.8)
   toFile: true, // Return as File instead of DataURL
 });

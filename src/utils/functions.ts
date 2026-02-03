@@ -176,7 +176,7 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
   const width = options?.width ?? renderState.prevSize.x;
   const height = options?.height ?? renderState.prevSize.y;
   const format = options?.format ?? "jpeg";
-  const quality = options?.quality ?? 1;
+  const quality = options?.quality ?? 0.95;
 
   try {
     // Ensure pixel ratio is 1 for consistent results

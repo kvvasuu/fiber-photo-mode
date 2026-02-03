@@ -18,7 +18,7 @@ import { Grain } from "./effects/Grain";
 import { HueSaturation } from "./effects/HueSaturation";
 import { Vignette } from "./effects/Vignette";
 
-export function PhotoModeEffects() {
+export function Effects() {
   const composer = usePhotoModeStore((state) => state.composer);
   const camera = usePhotoModeStore((state) => state.camera);
   const enabledEffects = usePhotoModeEffectsStore((state) => state.enabledEffects);
@@ -73,7 +73,11 @@ export function PhotoModeEffects() {
 
     composer.addPass(effectPass);
 
-    return () => effectPass.dispose();
+    return () => {
+      composer.removePass(effectPass);
+
+      effectPass.dispose();
+    };
   }, [composer, camera, enabledEffects]);
 
   if (!composer || !camera) return null;
