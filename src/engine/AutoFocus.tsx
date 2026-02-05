@@ -6,6 +6,7 @@ import { easing } from "maath";
 import { Vector3 } from "three";
 import { useCameraStore } from "../store/CameraStore";
 import { usePhotoModeStore } from "../store/PhotoModeStore";
+import { apertureToFocusRange } from "../utils/functions";
 
 interface AutoFocusPassHandle {
   dofRef: RefObject<DepthOfFieldEffect>;
@@ -31,6 +32,7 @@ export default function AutoFocus() {
 
   const camera = usePhotoModeStore((state) => state.camera);
   const composer = usePhotoModeStore((state) => state.composer);
+  const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
 
   const autoFocus = useCameraStore((state) => state.autoFocus);
   const DOFEnabled = useCameraStore((state) => state.DOFEnabled);
@@ -56,7 +58,7 @@ export default function AutoFocus() {
 
   useFrame(async (_, delta) => {
     const dofRef = autoFocusPassRef.current?.dofRef;
-    if (!camera || !dofRef?.current || !DOFEnabled) return;
+    if (!camera || !dofRef?.current || !DOFEnabled || !photoModeOn) return;
 
     if (!autoFocus) {
       // MANUAL MODE: move focus straight ahead from the camera
@@ -82,7 +84,7 @@ export default function AutoFocus() {
       if (autoFocus && delta > 0) {
         easing.damp3(dofRef.current.target, hitpointRef.current, 0.25, delta); // smooth transition
       } else {
-        dofRef.current.target.copy(hitpointRef.current); // immediate snap for manual mode
+        dofRef.current.target.copy(hitpointRef.current); // immediate snap
       }
     }
   });
@@ -91,8 +93,15 @@ export default function AutoFocus() {
 }
 
 const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
+  useImperativeHandle(ref, () => ({
+    dofRef: dofRef as RefObject<DepthOfFieldEffect>,
+  }));
+
   const composer = usePhotoModeStore((state) => state.composer);
   const camera = usePhotoModeStore((state) => state.camera);
+  const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
+
+  const aperture = useCameraStore((state) => state.aperture);
 
   const DOFEnabled = useCameraStore((state) => state.DOFEnabled);
 
@@ -103,10 +112,8 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
     if (!camera) return;
 
     const dofEffect = new DepthOfFieldEffect(camera, {
-      bokehScale: 10,
-      resolutionX: 1024,
-      resolutionY: 1020,
-      focalLength: 1,
+      bokehScale: 7,
+      focusRange: apertureToFocusRange(aperture) || 2,
     });
 
     dofEffect.target = new Vector3();
@@ -117,6 +124,7 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
 
     dofRef.current = dofEffect;
     autoFocusPass.current = new EffectPass(camera, dofEffect);
+    autoFocusPass.current.enabled = photoModeOn && DOFEnabled;
 
     return () => {
       dofEffect.dispose();
@@ -127,12 +135,8 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
   useEffect(() => {
     if (!composer || !autoFocusPass.current) return;
 
-    autoFocusPass.current.enabled = DOFEnabled;
-  }, [DOFEnabled]);
-
-  useImperativeHandle(ref, () => ({
-    dofRef: dofRef as RefObject<DepthOfFieldEffect>,
-  }));
+    autoFocusPass.current.enabled = photoModeOn && DOFEnabled;
+  }, [DOFEnabled, photoModeOn]);
 
   useEffect(() => {
     if (!composer || !autoFocusPass.current) return;
@@ -146,6 +150,14 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
       }
     };
   }, [composer, autoFocusPass.current]);
+
+  useEffect(() => {
+    if (!dofRef.current) return;
+
+    const focusRange = apertureToFocusRange(aperture);
+
+    dofRef.current.cocMaterial.uniforms.focusRange.value = focusRange;
+  }, [aperture]);
 
   return null;
 });

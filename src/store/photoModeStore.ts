@@ -1,9 +1,3 @@
-/**
- * PhotoMode Store
- * Central state management using Zustand
- * Manages rendering context, composition, and screenshot functionality
- */
-
 import { EffectComposer as EffectComposerImpl } from "postprocessing";
 import { Camera, Scene, WebGLRenderer } from "three";
 import { createWithEqualityFn } from "zustand/traditional";

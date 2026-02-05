@@ -1,8 +1,3 @@
-/**
- * usePhotoMode Hook
- * Provides screenshot capture and photo mode state management
- */
-
 import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { ScreenshotOptions } from "../types";
 

@@ -69,3 +69,11 @@ export const ENABLED_EFFECTS: Record<EffectName, boolean> = {
   bloom: false,
   grain: true,
 };
+
+// Aperture (f-stop) limits
+export const MIN_APERTURE = 1;
+export const MAX_APERTURE = 22;
+
+// Focal length limits in millimeters
+export const MIN_FOCAL_LENGTH = 10; // Typical wide-angle minimum
+export const MAX_FOCAL_LENGTH = 200; // Typical telephoto maximum

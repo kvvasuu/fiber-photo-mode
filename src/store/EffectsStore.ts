@@ -1,8 +1,3 @@
-/**
- * PhotoModeEffects store
- * Manages all post-processing effect settings for PhotoMode
- */
-
 import { createWithEqualityFn } from "zustand/traditional";
 import { EffectKey, EffectName } from "../types";
 import { EFFECT_DEFINITIONS, ENABLED_EFFECTS } from "../utils/constants";
@@ -36,7 +31,7 @@ const equalityFn = <T>(a: T, b: T) => a === b;
 let lastSetTime: number = 0;
 
 export const usePhotoModeEffectsStore = createWithEqualityFn<PhotoModeEffectsStore>(
-  (set, get) => ({
+  (set) => ({
     hue: 0, // -PI to PI
     saturation: 0, // -PI to PI
     brightness: 0, // -1 to 1

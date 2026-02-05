@@ -1,9 +1,3 @@
-/**
- * usePhotoModeEffects Hook
- * Provides access to photo mode effect values and control functions
- * Only returns properties for enabled effects (others return undefined)
- */
-
 import { usePhotoModeEffectsStore } from "../store/EffectsStore";
 import type { EffectKey } from "../types";
 
@@ -38,7 +32,7 @@ export type UsePhotoModeEffectsReturn = {
  * Hook to access and control photo mode effects
  * @returns Object with effect values and control functions
  */
-export function usePhotoModeEffects(): UsePhotoModeEffectsReturn {
+export function usePhotoModeEffects() {
   const hue = usePhotoModeEffectsStore((state) => state.hue);
   const saturation = usePhotoModeEffectsStore((state) => state.saturation);
   const brightness = usePhotoModeEffectsStore((state) => state.brightness);

@@ -21,7 +21,6 @@ type ComposerProps = Omit<EffectComposerProps, "children"> & {
  */
 export const Composer = forwardRef<EffectComposerImpl, ComposerProps>(({ children, ...props }, ref) => {
   const setComposer = usePhotoModeStore((state) => state.setComposer);
-  const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
 
   return (
     <EffectComposer
@@ -36,7 +35,7 @@ export const Composer = forwardRef<EffectComposerImpl, ComposerProps>(({ childre
     >
       <>
         {/* AutoFocus first */}
-        {photoModeOn && <AutoFocus />}
+        <AutoFocus />
 
         {/* Then User's Effects */}
         {children}
