@@ -75,5 +75,7 @@ export const MIN_APERTURE = 1;
 export const MAX_APERTURE = 22;
 
 // Focal length limits in millimeters
-export const MIN_FOCAL_LENGTH = 10; // Typical wide-angle minimum
-export const MAX_FOCAL_LENGTH = 200; // Typical telephoto maximum
+export const MIN_FOCAL_LENGTH = 4;
+export const MAX_FOCAL_LENGTH = 300;
+
+export const MAX_ZOOM = 8;

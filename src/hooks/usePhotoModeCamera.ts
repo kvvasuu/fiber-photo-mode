@@ -8,6 +8,7 @@ export function usePhotoModeCamera() {
   const aperture = useCameraStore((state) => state.aperture);
   const focalLength = useCameraStore((state) => state.focalLength);
   const focusDistance = useCameraStore((state) => state.focusDistance);
+  const rotation = useCameraStore((state) => state.rotation);
 
   const DOFEnabled = useCameraStore((state) => state.DOFEnabled);
   const autoFocus = useCameraStore((state) => state.autoFocus);
@@ -15,6 +16,7 @@ export function usePhotoModeCamera() {
   const setAperture = useCameraStore((state) => state.setAperture);
   const setFocalLength = useCameraStore((state) => state.setFocalLength);
   const setFocusDistance = useCameraStore((state) => state.setFocusDistance);
+  const setRotation = useCameraStore((state) => state.setRotation);
 
   const toggleDOF = useCameraStore((state) => state.toggleDOF);
   const toggleAutoFocus = useCameraStore((state) => state.toggleAutoFocus);
@@ -23,11 +25,13 @@ export function usePhotoModeCamera() {
     aperture,
     focalLength,
     focusDistance,
+    rotation,
     DOFEnabled,
     autoFocus,
     setAperture,
     setFocalLength,
     setFocusDistance,
+    setRotation,
     toggleDOF,
     toggleAutoFocus,
   };

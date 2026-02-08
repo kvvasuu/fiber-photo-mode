@@ -1,6 +1,6 @@
-import { Vector3 } from "three";
+import { PerspectiveCamera, Quaternion, Vector3 } from "three";
 import { SphericalCameraControls, UserControlsSnapshot } from "../../types";
-import { MAX_APERTURE, MIN_APERTURE } from "../constants";
+import { MAX_APERTURE, MAX_ZOOM, MIN_APERTURE } from "../constants";
 
 /**
  * Checks whether the provided controls object is compatible with
@@ -39,7 +39,7 @@ export function makeControlsSnapshot(c: any): UserControlsSnapshot | null {
     enabled: c.enabled,
     position: c.object.position.clone(), // world-space position
     target: c.target.clone(), // look-at target
-    zoom: c.object.zoom, // camera zoom factor
+    fov: c.object.fov, // camera fov factor
     spherical: {
       radius: c.getDistance(), // distance from target
       theta: c.getAzimuthalAngle(), // horizontal angle
@@ -51,7 +51,7 @@ export function makeControlsSnapshot(c: any): UserControlsSnapshot | null {
 /**
  * Restores a previously saved controls snapshot onto a given controls object.
  *
- * Moves the camera to the snapshot position, sets the target, zoom, and
+ * Moves the camera to the snapshot position, sets the target, fov, and
  * updates the projection matrix and internal state of the controls.
  * Does nothing if either snapshot is null or controls are incompatible.
  *
@@ -69,7 +69,7 @@ export function restoreControlsSnapshot(controls: any, snap: UserControlsSnapsho
   const offset = new Vector3().setFromSphericalCoords(snap.spherical.radius, snap.spherical.phi, snap.spherical.theta);
 
   controls.object.position.copy(snap.target).add(offset);
-  controls.object.zoom = snap.zoom;
+  controls.object.fov = snap.fov;
   controls.object.updateProjectionMatrix();
 
   // Update controls internal state (required by OrbitControls and similar)
@@ -128,6 +128,49 @@ export function focalLengthToFov(focalLengthMm: number, sensorSizeMm: number = 3
   const fovDegrees = (fovRadians * 180) / Math.PI;
 
   return fovDegrees;
+}
+
+/**
+ * Converts a desired focal length (in millimeters) to a PerspectiveCamera zoom value.
+ *
+ * The returned zoom value is calculated so that the camera's effective vertical FOV
+ * matches the FOV of a real camera lens with the given focal length.
+ *
+ * Important:
+ * - Very long focal lengths (e.g. 300mm+) can produce extremely large zoom values.
+ *   In practice, zoom should be clamped and combined with camera dolly for stability.
+ *
+ * @param cameraFov - The camera's base vertical FOV in degrees (camera.fov, without zoom applied)
+ * @param focalLengthMm - Desired focal length in millimeters
+ * @returns Zoom value to apply to the camera so that its effective FOV matches the focal length
+ *
+ */
+export function focalLengthToZoom(cameraFov: number, focalLengthMm: number): number {
+  const targetFov = focalLengthToFov(focalLengthMm);
+
+  // Numerical safety to avoid division by zero
+  const epsilon = 0.0001;
+  const safeTargetFov = Math.max(targetFov, epsilon);
+
+  const zoom = Math.tan((cameraFov * Math.PI) / 360) / Math.tan((safeTargetFov * Math.PI) / 360);
+
+  return Math.min(Math.max(zoom, 0.1), MAX_ZOOM);
+}
+
+const BASE_UP = new Vector3(0, 1, 0);
+
+export function setCameraRoll(camera: PerspectiveCamera, rollRad: number) {
+  // kierunek patrzenia
+  const viewDir = new Vector3();
+  camera.getWorldDirection(viewDir);
+
+  // quaternion rotacji wokół osi widzenia
+  const rollQuat = new Quaternion().setFromAxisAngle(viewDir, rollRad);
+
+  // reset do bazowego up
+  camera.up.copy(BASE_UP).applyQuaternion(rollQuat).normalize();
+
+  camera.updateProjectionMatrix();
 }
 
 /**

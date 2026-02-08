@@ -4,9 +4,9 @@ import { forwardRef, RefObject, useEffect, useImperativeHandle, useRef, useState
 
 import { easing } from "maath";
 import { Vector3 } from "three";
-import { useCameraStore } from "../store/CameraStore";
-import { usePhotoModeStore } from "../store/PhotoModeStore";
-import { apertureToFocusRange } from "../utils/functions";
+import { useCameraStore } from "../../store/CameraStore";
+import { usePhotoModeStore } from "../../store/PhotoModeStore";
+import { apertureToFocusRange } from "../../utils/functions";
 
 interface AutoFocusPassHandle {
   dofRef: RefObject<DepthOfFieldEffect>;

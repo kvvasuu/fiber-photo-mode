@@ -5,7 +5,7 @@ import { usePhotoModeEffectsStore } from "../store/EffectsStore";
 import { usePhotoModeStore } from "../store/PhotoModeStore";
 import { EffectName } from "../types";
 import { takeScreenshot } from "../utils/functions";
-import { Composer } from "./Composer";
+import { Composer } from "./effects/Composer";
 
 /**
  * PhotoMode component - Initialize in your Three.js canvas

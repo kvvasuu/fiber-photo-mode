@@ -9,24 +9,32 @@ type CameraStore = {
   DOFEnabled: boolean;
   autoFocus: boolean;
 
+  rotation: number; // -180 to 180
+
   setAperture: (aperture: number) => void;
   setFocalLength: (focalLength: number) => void;
   setFocusDistance: (focalDistance: number) => void;
 
+  setRotation: (rotation: number) => void;
+
   toggleDOF: (value?: boolean) => void;
   toggleAutoFocus: (value?: boolean) => void;
+
+  resetCamera: () => void;
 };
 
 const equalityFn = <T>(a: T, b: T) => a === b;
 
 export const useCameraStore = createWithEqualityFn<CameraStore>(
-  (set) => ({
+  (set, _get, store) => ({
     focalLength: 50,
     aperture: 2.8,
     focusDistance: 5,
 
     autoFocus: true,
     DOFEnabled: true,
+
+    rotation: 0,
 
     setAperture: (aperture) => {
       const clamped = Math.min(MAX_APERTURE, Math.max(MIN_APERTURE, aperture));
@@ -40,6 +48,10 @@ export const useCameraStore = createWithEqualityFn<CameraStore>(
       set({ focusDistance });
     },
 
+    setRotation: (rotation) => {
+      set({ rotation });
+    },
+
     toggleDOF: (value?: boolean) => {
       set((state) => ({
         DOFEnabled: value ?? !state.DOFEnabled,
@@ -50,6 +62,13 @@ export const useCameraStore = createWithEqualityFn<CameraStore>(
         autoFocus: value ?? !state.autoFocus,
       }));
     },
+
+    resetCamera: () =>
+      set(() => ({
+        focalLength: store.getInitialState().focalLength,
+        aperture: store.getInitialState().aperture,
+        focusDistance: store.getInitialState().focusDistance,
+      })),
   }),
   equalityFn,
 );

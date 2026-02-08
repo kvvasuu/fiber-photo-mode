@@ -65,7 +65,7 @@ export interface SphericalCameraControls {
   target: Vector3;
   object: {
     position: Vector3;
-    zoom: number;
+    fov: number;
     updateProjectionMatrix(): void;
   };
 
@@ -80,7 +80,7 @@ export type UserControlsSnapshot = Partial<EventDispatcher> & {
   enabled: boolean;
   target: Vector3;
   position: Vector3;
-  zoom: number;
+  fov: number;
   spherical: {
     radius: number;
     theta: number;
