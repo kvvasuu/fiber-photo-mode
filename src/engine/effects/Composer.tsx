@@ -2,8 +2,8 @@ import type { EffectComposerProps } from "@react-three/postprocessing";
 import { EffectComposer } from "@react-three/postprocessing";
 import { EffectComposer as EffectComposerImpl } from "postprocessing";
 import { forwardRef, ReactNode } from "react";
-import { usePhotoModeStore } from "../store/PhotoModeStore";
-import AutoFocus from "./AutoFocus";
+import { usePhotoModeStore } from "../../store/PhotoModeStore";
+import AutoFocus from "../camera/AutoFocus";
 import { Effects } from "./Effects";
 
 /**

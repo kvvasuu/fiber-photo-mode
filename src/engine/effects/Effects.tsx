@@ -9,14 +9,14 @@ import {
 } from "postprocessing";
 import { useEffect, useRef } from "react";
 import { Vector2 } from "three";
-import { usePhotoModeEffectsStore } from "../store/EffectsStore";
-import { usePhotoModeStore } from "../store/PhotoModeStore";
-import { Bloom } from "./effects/Bloom";
-import { BrightnessContrast } from "./effects/BrightnessContrast";
-import { ChromaticAberration } from "./effects/ChromaticAberration";
-import { Grain } from "./effects/Grain";
-import { HueSaturation } from "./effects/HueSaturation";
-import { Vignette } from "./effects/Vignette";
+import { usePhotoModeEffectsStore } from "../../store/EffectsStore";
+import { usePhotoModeStore } from "../../store/PhotoModeStore";
+import { Bloom } from "./Bloom";
+import { BrightnessContrast } from "./BrightnessContrast";
+import { ChromaticAberration } from "./ChromaticAberration";
+import { Grain } from "./Grain";
+import { HueSaturation } from "./HueSaturation";
+import { Vignette } from "./Vignette";
 
 export function Effects() {
   const composer = usePhotoModeStore((state) => state.composer);
@@ -28,8 +28,8 @@ export function Effects() {
     brightnessContrast: new BrightnessContrastEffect({ brightness: 0, contrast: 0 }),
     chromaticAberration: new ChromaticAberrationEffect({
       offset: new Vector2(0, 0),
-      radialModulation: false,
-      modulationOffset: 0,
+      radialModulation: true,
+      modulationOffset: 0.15,
     }),
     bloom: new BloomEffect({
       intensity: 0,

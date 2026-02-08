@@ -32,14 +32,14 @@ let lastSetTime: number = 0;
 
 export const usePhotoModeEffectsStore = createWithEqualityFn<PhotoModeEffectsStore>(
   (set) => ({
-    hue: 0, // -PI to PI
-    saturation: 0, // -PI to PI
-    brightness: 0, // -1 to 1
-    contrast: 0, // -1 to 1
-    chromaticAberration: 0, // 0 to 1
-    bloom: 0, // 0 to 1
-    vignette: 0, // 0 to 1
-    grain: 0, // 0 to 1
+    hue: EFFECT_DEFINITIONS.hue.default, // -PI to PI
+    saturation: EFFECT_DEFINITIONS.saturation.default, // -PI to PI
+    brightness: EFFECT_DEFINITIONS.brightness.default, // -1 to 1
+    contrast: EFFECT_DEFINITIONS.contrast.default, // -1 to 1
+    chromaticAberration: EFFECT_DEFINITIONS.chromaticAberration.default, // 0 to 1
+    bloom: EFFECT_DEFINITIONS.bloom.default, // 0 to 1
+    vignette: EFFECT_DEFINITIONS.vignette.default, // 0 to 1
+    grain: EFFECT_DEFINITIONS.grain.default, // 0 to 1
 
     enabledEffects: {
       hueSaturation: ENABLED_EFFECTS.hueSaturation,
