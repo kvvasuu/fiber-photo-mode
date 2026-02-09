@@ -1,4 +1,4 @@
-import { PerspectiveCamera as PerspectiveCameraDrei } from "@react-three/drei";
+import { CameraControlsProps, PerspectiveCamera as PerspectiveCameraDrei } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useLayoutEffect, useRef, useState } from "react";
 import { PerspectiveCamera } from "three";
@@ -13,12 +13,25 @@ import {
 } from "../../utils/functions";
 import PhotoModeControls from "./PhotoModeControls";
 
+type Props = CameraControlsProps & {
+  controlsRef?: React.RefObject<any>;
+  initialAperture?: number;
+  initialFocalLength?: number;
+  initialFocusDistance?: number;
+};
+
 /**
  * CameraController Component
  * Handles switching between the user's users camera and a dedicated
  * Photo Mode camera. It also manages snapshotting and restoring user controls when entering/exiting Photo Mode.
  */
-export function CameraController<T = unknown>({ controlsRef }: { controlsRef?: React.RefObject<T | null> }) {
+export function CameraController({
+  controlsRef,
+  initialAperture,
+  initialFocalLength,
+  initialFocusDistance,
+  ...props
+}: Props) {
   // Raw controls from R3F, could be undefined or any kind of controls
   const threeControls = useThree((s) => s.controls);
   const userControls = controlsRef?.current || threeControls;
@@ -56,7 +69,13 @@ export function CameraController<T = unknown>({ controlsRef }: { controlsRef?: R
       controls.enabled = false;
     }
 
-    useCameraStore.setState({ focalLength: fovToFocalLength((camera as PerspectiveCamera)?.fov || 50) });
+    const resolvedFocalLength =
+      initialFocalLength ?? fovToFocalLength(camera instanceof PerspectiveCamera ? camera.fov : 50);
+
+    // Set initial camera values
+    useCameraStore.getState().setFocalLength(resolvedFocalLength);
+    if (initialAperture !== undefined) useCameraStore.getState().setAperture(initialAperture);
+    if (initialFocusDistance !== undefined) useCameraStore.getState().setFocusDistance(initialFocusDistance);
 
     /**
      * Cleanup function executed when:
@@ -90,7 +109,13 @@ export function CameraController<T = unknown>({ controlsRef }: { controlsRef?: R
         far={2000}
         name="PhotoCamera"
       />
-      {photoCamera && <PhotoModeControls controlsSnapshot={controlsSnapshotRef.current} />}
+      {photoCamera && (
+        <PhotoModeControls
+          controlsSnapshot={controlsSnapshotRef.current}
+          userCamera={userCameraRef.current}
+          {...props}
+        />
+      )}
     </>
   );
 }

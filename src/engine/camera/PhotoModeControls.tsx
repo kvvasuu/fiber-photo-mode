@@ -1,4 +1,5 @@
-import { CameraControls } from "@react-three/drei";
+import { CameraControls, CameraControlsProps } from "@react-three/drei";
+import { Camera } from "@react-three/fiber";
 import { degToRad } from "maath/misc";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { PerspectiveCamera } from "three";
@@ -7,9 +8,10 @@ import { UserControlsSnapshot } from "../../types";
 import { MAX_ZOOM } from "../../utils/constants";
 import { focalLengthToZoom, setCameraRoll } from "../../utils/functions";
 
-interface Props {
+type Props = CameraControlsProps & {
   controlsSnapshot?: UserControlsSnapshot | null;
-}
+  userCamera?: Camera;
+};
 
 /**
  * PhotoModeControls Component
@@ -19,7 +21,7 @@ interface Props {
  * @param controlsSnapshot - Optional snapshot of user controls from gameplay,
  *                           used to initialize the Photo Mode camera position.
  */
-export default function PhotoModeControls({ controlsSnapshot }: Props) {
+export default function PhotoModeControls({ controlsSnapshot, userCamera, ...props }: Props) {
   // Ref to access the underlying CameraControls instance
   const ref = useRef<CameraControls>(null);
 
@@ -37,16 +39,15 @@ export default function PhotoModeControls({ controlsSnapshot }: Props) {
     if (!initialFov.current)
       initialFov.current = controlsSnapshot?.fov || (ref.current.camera as PerspectiveCamera).fov || 50;
 
-    // Early return if no snapshot exists or ref is not mounted yet
-    if (!controlsSnapshot) return;
+    const pos = controlsSnapshot?.position ?? userCamera?.position;
 
     ref.current.setLookAt(
-      controlsSnapshot.position.x,
-      controlsSnapshot.position.y,
-      controlsSnapshot.position.z,
-      controlsSnapshot.target.x,
-      controlsSnapshot.target.y,
-      controlsSnapshot.target.z,
+      pos?.x ?? 0,
+      pos?.y ?? 0,
+      pos?.z ?? 0,
+      controlsSnapshot?.target?.x ?? 0,
+      controlsSnapshot?.target?.y ?? 0,
+      controlsSnapshot?.target?.z ?? 0,
       false, // disable smooth animation for instant positioning
     );
   }, [controlsSnapshot]);
@@ -66,5 +67,5 @@ export default function PhotoModeControls({ controlsSnapshot }: Props) {
     setCameraRoll(camera, degToRad(rotation));
   }, [rotation]);
 
-  return <CameraControls ref={ref} smoothTime={0.25} maxZoom={MAX_ZOOM} />;
+  return <CameraControls ref={ref} smoothTime={0.25} maxZoom={MAX_ZOOM} {...props} />;
 }

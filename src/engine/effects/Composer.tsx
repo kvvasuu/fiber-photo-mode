@@ -23,27 +23,27 @@ export const Composer = forwardRef<EffectComposerImpl, ComposerProps>(({ childre
   const setComposer = usePhotoModeStore((state) => state.setComposer);
 
   return (
-    <EffectComposer
-      {...props}
-      ref={(c: EffectComposerImpl | null) => {
-        // Register composer in store
-        setComposer(c);
-        // Pass ref to parent
-        if (typeof ref === "function") ref(c);
-        else if (ref) ref.current = c;
-      }}
-    >
-      <>
-        {/* AutoFocus first */}
-        <AutoFocus />
+    <>
+      <EffectComposer
+        {...props}
+        ref={(c: EffectComposerImpl | null) => {
+          // Register composer in store
+          setComposer(c);
+          // Pass ref to parent
+          if (typeof ref === "function") ref(c);
+          else if (ref) ref.current = c;
+        }}
+      >
+        <>
+          {/* User's Effects */}
+          {children}
 
-        {/* Then User's Effects */}
-        {children}
-
-        {/* Photo Mode Effects last */}
-        <Effects />
-      </>
-    </EffectComposer>
+          {/* Photo Mode Effects */}
+          <Effects />
+        </>
+      </EffectComposer>
+      <AutoFocus />
+    </>
   );
 });
 

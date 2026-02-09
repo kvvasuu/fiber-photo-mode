@@ -44,8 +44,8 @@ export default function AutoFocus() {
   useEffect(() => {
     if (!composer || !camera) return;
 
-    composer.addPass(depthPickingPass);
-    composer.addPass(copyPass);
+    composer.addPass(depthPickingPass, 2);
+    composer.addPass(copyPass, 3);
 
     return () => {
       composer.removePass(depthPickingPass);
@@ -142,7 +142,7 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
     if (!composer || !autoFocusPass.current) return;
 
     autoFocusPass.current.name = "AutoFocusPass";
-    composer.addPass(autoFocusPass.current);
+    composer.addPass(autoFocusPass.current, 1);
 
     return () => {
       if (autoFocusPass.current) {
