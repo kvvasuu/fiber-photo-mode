@@ -20,7 +20,7 @@ interface AutoFocusPassHandle {
  *   - Manual: fixed distance along the camera forward direction
  *   - Auto: calculates the nearest object depth from the camera (center of screen)
  */
-export default function AutoFocus() {
+export function AutoFocus() {
   const autoFocusPassRef = useRef<AutoFocusPassHandle>(null);
 
   const hitpointRef = useRef(new Vector3());

@@ -1,121 +1,63 @@
-import { CameraControlsProps, PerspectiveCamera as PerspectiveCameraDrei } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
-import { useLayoutEffect, useRef, useState } from "react";
-import { PerspectiveCamera } from "three";
+import { CameraControls, CameraControlsProps } from "@react-three/drei";
+import { degToRad } from "maath/misc";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { PerspectiveCamera, Vector3 } from "three";
 import { useCameraStore } from "../../store/CameraStore";
-import { usePhotoModeStore } from "../../store/PhotoModeStore";
-import { UserControlsSnapshot } from "../../types";
-import {
-  fovToFocalLength,
-  isSphericalControls,
-  makeControlsSnapshot,
-  restoreControlsSnapshot,
-} from "../../utils/functions";
-import PhotoModeControls from "./PhotoModeControls";
+import { UserCameraSnapshot } from "../../types";
+import { MAX_ZOOM } from "../../utils/constants";
+import { focalLengthToZoom, setCameraRoll } from "../../utils/functions";
 
 type Props = CameraControlsProps & {
-  controlsRef?: React.RefObject<any>;
-  initialAperture?: number;
-  initialFocalLength?: number;
-  initialFocusDistance?: number;
+  snapshot: UserCameraSnapshot | null;
 };
 
 /**
- * CameraController Component
- * Handles switching between the user's users camera and a dedicated
- * Photo Mode camera. It also manages snapshotting and restoring user controls when entering/exiting Photo Mode.
+ * PhotoModeControls Component
+ * Wraps a CameraControls instance for Photo Mode
+ *
+ * @param snapshot - Snapshot of user controls/camera used to initialize the Photo Mode camera position.
  */
-export function CameraController({
-  controlsRef,
-  initialAperture,
-  initialFocalLength,
-  initialFocusDistance,
-  ...props
-}: Props) {
-  // Raw controls from R3F, could be undefined or any kind of controls
-  const threeControls = useThree((s) => s.controls);
-  const userControls = controlsRef?.current || threeControls;
-  const camera = useThree((s) => s.camera);
+export default function CameraController({ snapshot, ...props }: Props) {
+  const ref = useRef<CameraControls>(null);
 
-  // Store reference to the current camera (users camera)
-  const userCameraRef = useRef(camera);
+  const focalLength = useCameraStore((state) => state.focalLength);
+  const rotation = useCameraStore((state) => state.rotation);
 
-  // Setter for the global R3F state
-
-  const set = useThree((s) => s.set);
-
-  // Only accept "spherical" camera controls compatible with orbit-like snapshots
-  const controls = isSphericalControls(userControls) ? userControls : undefined;
-
-  // Photo Mode toggle from global store
-  const photoModeOn = usePhotoModeStore((s) => s.photoModeOn);
-  const [photoCamera, setPhotoCamera] = useState<PerspectiveCamera | null>(null);
-
-  // Snapshot of the controls to restore after exiting Photo Mode
-  const controlsSnapshotRef = useRef<UserControlsSnapshot>(null);
-
-  /**
-   * useLayoutEffect for managing camera and controls lifecycles
-   * - When entering Photo Mode: create new perspective camera and snapshot controls
-   * - When exiting Photo Mode: restore original camera and controls
-   */
   useLayoutEffect(() => {
-    // Early return if Photo Mode is not active
-    if (!photoModeOn) return;
+    if (!ref.current || !snapshot) return;
 
-    // Snapshot and disable user controls if they exist and are compatible
-    if (controls) {
-      controlsSnapshotRef.current = makeControlsSnapshot(controls);
-      controls.enabled = false;
+    let target: Vector3 = snapshot.target;
+
+    if (snapshot.type === "StaticCamera" && snapshot.quaternion) {
+      const dir = new Vector3(0, 0, -1).applyQuaternion(snapshot.quaternion);
+      target = snapshot.position.clone().add(dir.multiplyScalar(5));
     }
 
-    const resolvedFocalLength =
-      initialFocalLength ?? fovToFocalLength(camera instanceof PerspectiveCamera ? camera.fov : 50);
+    ref.current.setLookAt(
+      snapshot.position.x,
+      snapshot.position.y,
+      snapshot.position.z,
+      target.x,
+      target.y,
+      target.z,
+      false, // disable smooth animation for instant positioning
+    );
+  }, [snapshot]);
 
-    // Set initial camera values
-    useCameraStore.getState().setFocalLength(resolvedFocalLength);
-    if (initialAperture !== undefined) useCameraStore.getState().setAperture(initialAperture);
-    if (initialFocusDistance !== undefined) useCameraStore.getState().setFocusDistance(initialFocusDistance);
+  useEffect(() => {
+    if (!ref.current) return;
 
-    /**
-     * Cleanup function executed when:
-     * - Photo Mode is turned off
-     * - Component is unmounted
-     */
-    return () => {
-      // Restore controls snapshot if available
-      if (controls) {
-        restoreControlsSnapshot(controls, controlsSnapshotRef.current);
-      }
+    const zoom = focalLengthToZoom(snapshot?.fov || 50, focalLength);
 
-      // Restore original users camera
-      if (userCameraRef.current) {
-        set({ camera: userCameraRef.current });
-      }
+    ref.current.zoomTo(zoom, true);
+  }, [focalLength]);
 
-      useCameraStore.getState().resetCamera();
-    };
-  }, [photoModeOn]);
+  useEffect(() => {
+    if (!ref.current) return;
 
-  if (!photoModeOn) return null;
+    const camera = ref.current.camera as PerspectiveCamera;
+    setCameraRoll(camera, degToRad(rotation));
+  }, [rotation]);
 
-  return (
-    <>
-      <PerspectiveCameraDrei
-        makeDefault
-        ref={setPhotoCamera}
-        fov={(camera as PerspectiveCamera)?.fov || 50}
-        near={0.01}
-        far={2000}
-        name="PhotoCamera"
-      />
-      {photoCamera && (
-        <PhotoModeControls
-          controlsSnapshot={controlsSnapshotRef.current}
-          userCamera={userCameraRef.current}
-          {...props}
-        />
-      )}
-    </>
-  );
+  return <CameraControls makeDefault ref={ref} maxZoom={MAX_ZOOM} {...props} />;
 }

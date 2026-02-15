@@ -1,71 +1,43 @@
-import { CameraControls, CameraControlsProps } from "@react-three/drei";
-import { Camera } from "@react-three/fiber";
-import { degToRad } from "maath/misc";
-import { useEffect, useLayoutEffect, useRef } from "react";
-import { PerspectiveCamera } from "three";
-import { useCameraStore } from "../../store/CameraStore";
-import { UserControlsSnapshot } from "../../types";
-import { MAX_ZOOM } from "../../utils/constants";
-import { focalLengthToZoom, setCameraRoll } from "../../utils/functions";
+import { CameraControlsProps } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { RefObject, useLayoutEffect, useRef } from "react";
+import { usePhotoModeStore } from "../../store/PhotoModeStore";
+import { UserCameraSnapshot } from "../../types";
+import { createCameraAdapter } from "../../utils/cameraControllerAdapter";
+import CameraController from "./CameraController";
 
 type Props = CameraControlsProps & {
-  controlsSnapshot?: UserControlsSnapshot | null;
-  userCamera?: Camera;
+  controlsRef?: RefObject<any>;
 };
 
-/**
- * PhotoModeControls Component
- * Wraps a CameraControls instance for Photo Mode, allowing
- * smooth manipulation of the camera based on a previously stored controls snapshot.
- *
- * @param controlsSnapshot - Optional snapshot of user controls from gameplay,
- *                           used to initialize the Photo Mode camera position.
- */
-export default function PhotoModeControls({ controlsSnapshot, userCamera, ...props }: Props) {
-  // Ref to access the underlying CameraControls instance
-  const ref = useRef<CameraControls>(null);
+export function PhotoModeControls({ controlsRef, ...props }: Props) {
+  const controls = useThree((s) => s.controls);
+  const camera = useThree((s) => s.camera);
+  const adapterObject = controlsRef?.current || controls || camera;
 
-  const initialFov = useRef<number>(null);
-  const focalLength = useCameraStore((state) => state.focalLength);
-  const rotation = useCameraStore((state) => state.rotation);
+  const photoModeOn = usePhotoModeStore((s) => s.photoModeOn);
 
-  /**
-   * When the controlsSnapshot changes (e.g., when Photo Mode is entered),
-   * immediately set the CameraControls to match the snapshot.
-   */
+  const snapshotRef = useRef<UserCameraSnapshot>(null);
+
   useLayoutEffect(() => {
-    if (!ref.current) return;
+    if (!photoModeOn) return;
 
-    if (!initialFov.current)
-      initialFov.current = controlsSnapshot?.fov || (ref.current.camera as PerspectiveCamera).fov || 50;
+    const adapter = createCameraAdapter(adapterObject);
 
-    const pos = controlsSnapshot?.position ?? userCamera?.position;
+    if (!adapter || snapshotRef.current) return;
 
-    ref.current.setLookAt(
-      pos?.x ?? 0,
-      pos?.y ?? 0,
-      pos?.z ?? 0,
-      controlsSnapshot?.target?.x ?? 0,
-      controlsSnapshot?.target?.y ?? 0,
-      controlsSnapshot?.target?.z ?? 0,
-      false, // disable smooth animation for instant positioning
-    );
-  }, [controlsSnapshot]);
+    snapshotRef.current = adapter.snapshot();
+    adapter.setEnabled(false);
 
-  useEffect(() => {
-    if (!ref.current || !initialFov.current) return;
+    return () => {
+      if (adapter && snapshotRef.current) {
+        adapter.restore(snapshotRef.current);
+      }
+      snapshotRef.current = null;
+    };
+  }, [photoModeOn]);
 
-    const zoom = focalLengthToZoom(initialFov.current, focalLength);
+  if (!photoModeOn) return null;
 
-    ref.current.zoomTo(zoom, true);
-  }, [focalLength]);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const camera = ref.current.camera as PerspectiveCamera;
-    setCameraRoll(camera, degToRad(rotation));
-  }, [rotation]);
-
-  return <CameraControls ref={ref} smoothTime={0.25} maxZoom={MAX_ZOOM} {...props} />;
+  return <CameraController snapshot={snapshotRef.current} {...props} />;
 }

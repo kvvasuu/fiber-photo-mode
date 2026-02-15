@@ -18,7 +18,7 @@ type PhotoModeProps = Omit<EffectComposerProps, "children"> & {
   disableEvents?: boolean;
   children?: ReactNode;
 };
-export function PhotoMode({ children, enabledEffects, disableEvents = true, ...props }: PhotoModeProps) {
+export function PhotoMode({ enabledEffects, disableEvents = true, children, ...props }: PhotoModeProps) {
   const gl = useThree((state) => state.gl);
   const scene = useThree((state) => state.scene);
   const camera = useThree((state) => state.camera);
