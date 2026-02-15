@@ -45,12 +45,12 @@ export default function CameraController({ snapshot, ...props }: Props) {
   }, [snapshot]);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || !snapshot) return;
 
     const zoom = focalLengthToZoom(snapshot?.fov || 50, focalLength);
 
     ref.current.zoomTo(zoom, true);
-  }, [focalLength]);
+  }, [focalLength, snapshot]);
 
   useEffect(() => {
     if (!ref.current) return;
