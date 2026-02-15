@@ -3,7 +3,6 @@ import { ScreenshotOptions } from "../types";
 
 /**
  * Hook to manage photo mode functionality
- * @param options - Default screenshot options applied to all captures
  * @returns Object with takeScreenshot, photoModeOn state, and togglePhotoMode function
  */
 export function usePhotoMode() {

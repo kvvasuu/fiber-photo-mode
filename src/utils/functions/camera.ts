@@ -5,21 +5,19 @@ import { MAX_APERTURE, MAX_ZOOM, MIN_APERTURE } from "../constants";
  * Converts FOV (in degrees) to focal length (in mm)
  *
  * @param fovDegrees - Field of view in degrees (vertical FOV for Three.js PerspectiveCamera)
- * @param sensorSizeMm - Sensor size in mm (35mm for full frame, 24mm for APS-C)
- * @param isVertical - Whether FOV is vertical (true for Three.js) or horizontal
  * @returns Focal length in millimeters
  *
  * @example
  * // Three.js camera with 50° vertical FOV on full frame sensor
  * fovToFocalLength(50, 35, true) // ≈ 35mm
  */
-export function fovToFocalLength(fovDegrees: number, sensorSizeMm: number = 35, isVertical: boolean = true): number {
+export function fovToFocalLength(fovDegrees: number): number {
   // Convert degrees to radians
   const fovRadians = (fovDegrees * Math.PI) / 180;
 
   // Three.js uses vertical FOV, but photography typically refers to horizontal FOV
   // For full frame (36mm x 24mm), vertical dimension is 24mm
-  const sensorDimension = isVertical ? (sensorSizeMm * 24) / 36 : sensorSizeMm;
+  const sensorDimension = (35 * 24) / 36;
 
   // Calculate focal length using the formula: f = d / (2 * tan(FOV/2))
   // where d is sensor dimension and FOV is in radians
@@ -32,18 +30,16 @@ export function fovToFocalLength(fovDegrees: number, sensorSizeMm: number = 35, 
  * Converts focal length (in mm) to FOV (in degrees)
  *
  * @param focalLengthMm - Focal length in millimeters
- * @param sensorSizeMm - Sensor size in mm (35mm for full frame, 24mm for APS-C)
- * @param isVertical - Whether to return vertical (true) or horizontal FOV
  * @returns Field of view in degrees
  *
  * @example
  * // 50mm lens on full frame sensor
  * focalLengthToFov(50, 35, true) // ≈ 40° (vertical FOV for Three.js)
  */
-export function focalLengthToFov(focalLengthMm: number, sensorSizeMm: number = 35, isVertical: boolean = true): number {
+export function focalLengthToFov(focalLengthMm: number): number {
   // Calculate sensor dimension based on orientation
   // For full frame: horizontal = 36mm, vertical = 24mm
-  const sensorDimension = isVertical ? (sensorSizeMm * 24) / 36 : sensorSizeMm;
+  const sensorDimension = (35 * 24) / 36;
 
   // Calculate FOV using the formula: FOV = 2 * atan(d / (2 * f))
   // where d is sensor dimension and f is focal length
@@ -85,14 +81,11 @@ export function focalLengthToZoom(cameraFov: number, focalLengthMm: number): num
 const BASE_UP = new Vector3(0, 1, 0);
 
 export function setCameraRoll(camera: PerspectiveCamera, rollRad: number) {
-  // kierunek patrzenia
   const viewDir = new Vector3();
   camera.getWorldDirection(viewDir);
 
-  // quaternion rotacji wokół osi widzenia
   const rollQuat = new Quaternion().setFromAxisAngle(viewDir, rollRad);
 
-  // reset do bazowego up
   camera.up.copy(BASE_UP).applyQuaternion(rollQuat).normalize();
 
   camera.updateProjectionMatrix();
