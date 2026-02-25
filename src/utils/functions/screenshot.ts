@@ -197,8 +197,38 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
     // Configure camera
     configureCamera(camera as PerspectiveCamera, outputWidth, outputHeight);
 
+    // Call onBeforeScreenshot callback if provided
+    if (options?.onBeforeScreenshot) {
+      try {
+        options.onBeforeScreenshot({
+          gl,
+          scene,
+          camera,
+          composer,
+          options,
+        });
+      } catch (e) {
+        console.error("onBeforeScreenshot error", e);
+      }
+    }
+
     // Render to FBO
     renderToFBO(gl, scene, camera as PerspectiveCamera, fbo, composer);
+
+    // Call onAfterScreenshot callback if provided
+    if (options?.onAfterScreenshot) {
+      try {
+        options.onAfterScreenshot({
+          gl,
+          scene,
+          camera,
+          composer,
+          options,
+        });
+      } catch (e) {
+        console.error("onAfterScreenshot error", e);
+      }
+    }
 
     // Read pixels from FBO
     gl.readRenderTargetPixels(fbo, 0, 0, outputWidth, outputHeight, buffer);

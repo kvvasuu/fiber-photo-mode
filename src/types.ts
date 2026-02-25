@@ -16,7 +16,21 @@ export type ScreenshotOptions = {
   quality?: number;
   /** Return as File instead of DataURL */
   toFile?: boolean;
+  /** Optional camera to override the default camera for screenshot rendering */
+  camera?: Camera;
+  /** Callback executed before screenshot rendering. Allows custom modifications to gl, scene, camera, composer, or options */
+  onBeforeScreenshot?: (ctx: ScreenshotContext) => void;
+  /** Callback executed after screenshot rendering. Allows cleanup or restoration of changes made in beforeScreenshot */
+  onAfterScreenshot?: (ctx: ScreenshotContext) => void;
 };
+
+export interface ScreenshotContext {
+  gl: WebGLRenderer;
+  scene: Scene;
+  camera: Camera;
+  composer?: EffectComposer;
+  options: ScreenshotOptions;
+}
 
 /**
  * Screenshot function signature
