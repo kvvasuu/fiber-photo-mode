@@ -20,7 +20,7 @@ type PhotoModeInternalStore = {
   composer?: EffectComposerImpl | null;
 
   /** Screenshot capture function */
-  takeScreenshot?: (options?: ScreenshotOptions) => Promise<string | File>;
+  takeScreenshot?: (options?: ScreenshotOptions) => Promise<string | File | Blob | HTMLCanvasElement>;
   /** Toggle photo mode state */
   togglePhotoMode: (value?: boolean) => void;
 
@@ -34,7 +34,7 @@ type PhotoModeInternalStore = {
   /** Register EffectComposer */
   setComposer: (c: EffectComposerImpl | null) => void;
   /** Register screenshot function */
-  setTakeScreenshot: (fn: (options?: ScreenshotOptions) => Promise<string | File>) => void;
+  setTakeScreenshot: (fn: (options?: ScreenshotOptions) => Promise<string | File | Blob | HTMLCanvasElement>) => void;
 };
 
 // Equality check to prevent unnecessary re-renders

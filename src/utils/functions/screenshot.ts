@@ -9,7 +9,7 @@ import {
   WebGLRenderer,
   WebGLRenderTarget,
 } from "three";
-import { TakeScreenshotFn } from "../../types";
+import { ScreenshotOptions, TakeScreenshotFn } from "../../types";
 import { CapturePass } from "./../CapturePass";
 
 /**
@@ -142,22 +142,30 @@ const pixelsToCanvas = (buffer: Uint8Array, width: number, height: number): HTML
 };
 
 /**
- * Converts canvas to File or DataURL string
+ * Converts canvas to requested output type.
  */
 const canvasToOutput = async (
   canvas: HTMLCanvasElement,
   format: string,
   quality: number,
-  toFile?: boolean,
-): Promise<string | File> => {
-  const blob = await new Promise<Blob>((resolve, reject) =>
+  returnType: ScreenshotOptions["returnType"] = "objectURL",
+): Promise<HTMLCanvasElement | Blob | File | string> => {
+  if (returnType === "canvas") {
+    return canvas;
+  }
+
+  const blob: Blob = await new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), `image/${format}`, quality),
   );
 
-  if (toFile) {
-    return new File([blob], `screenshot.${format}`, { type: `image/${format}` });
-  } else {
-    return URL.createObjectURL(blob);
+  switch (returnType) {
+    case "blob":
+      return blob;
+    case "file":
+      return new File([blob], `screenshot.${format}`, { type: `image/${format}` });
+    case "objectURL":
+    default:
+      return URL.createObjectURL(blob);
   }
 };
 
@@ -244,7 +252,7 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
 
     // Convert to output format
     const canvas = pixelsToCanvas(buffer, outputWidth, outputHeight);
-    return canvasToOutput(canvas, format, quality, options?.toFile);
+    return canvasToOutput(canvas, format, quality, options?.returnType);
   } catch (e) {
     // Attempt to restore state even on failure
     restoreRenderState(gl, camera as PerspectiveCamera, renderState);

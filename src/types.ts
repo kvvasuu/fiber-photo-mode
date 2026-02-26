@@ -14,10 +14,8 @@ export type ScreenshotOptions = {
   format?: "jpeg" | "png" | "webp" | "avif";
   /** Compression quality (0-1) */
   quality?: number;
-  /** Return as File instead of DataURL */
-  toFile?: boolean;
-  /** Optional camera to override the default camera for screenshot rendering */
-  camera?: Camera;
+  /** Return type of screenshot output */
+  returnType?: "canvas" | "blob" | "file" | "objectURL";
   /** Callback executed before screenshot rendering. Allows custom modifications to gl, scene, camera, composer, or options */
   onBeforeScreenshot?: (ctx: ScreenshotContext) => void;
   /** Callback executed after screenshot rendering. Allows cleanup or restoration of changes made in beforeScreenshot */
@@ -42,7 +40,7 @@ export type TakeScreenshotFn = (
   scene: Scene,
   camera: Camera,
   composer?: EffectComposer,
-) => (options?: ScreenshotOptions) => Promise<string | File>;
+) => (options?: ScreenshotOptions) => Promise<string | File | Blob | HTMLCanvasElement>;
 
 /**
  * PhotoModeComposer effects settings
