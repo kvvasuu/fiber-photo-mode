@@ -233,6 +233,9 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
     // Read pixels from FBO
     gl.readRenderTargetPixels(fbo, 0, 0, outputWidth, outputHeight, buffer);
 
+    // Restore previous render state
+    restoreRenderState(gl, camera as PerspectiveCamera, renderState);
+
     // Cleanup render target
     fbo.dispose();
 
@@ -242,8 +245,9 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
     // Convert to output format
     const canvas = pixelsToCanvas(buffer, outputWidth, outputHeight);
     return canvasToOutput(canvas, format, quality, options?.toFile);
-  } finally {
-    // Restore previous state
+  } catch (e) {
+    // Attempt to restore state even on failure
     restoreRenderState(gl, camera as PerspectiveCamera, renderState);
+    throw e;
   }
 };
