@@ -19,5 +19,7 @@ export function Vignette({ effect }: { effect: VignetteEffect }) {
     effect.darkness = photoModeOn ? vignetteValue : 0;
   }, [effect, vignette, photoModeOn]);
 
-  return null;
+  if (!effect) return null;
+
+  return <primitive object={effect} />;
 }

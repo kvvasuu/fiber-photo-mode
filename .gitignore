@@ -17,3 +17,6 @@ npm-debug.log*
 
 # build output
 /dist
+
+# example
+/example

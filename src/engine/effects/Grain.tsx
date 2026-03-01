@@ -15,5 +15,8 @@ export function Grain({ effect }: { effect: NoiseEffect }) {
 
     effect.blendMode.opacity.value = photoModeOn ? mapEffectValue(grain, "grain") : 0;
   }, [effect, grain, photoModeOn]);
-  return null;
+
+  if (!effect) return null;
+
+  return <primitive object={effect} />;
 }

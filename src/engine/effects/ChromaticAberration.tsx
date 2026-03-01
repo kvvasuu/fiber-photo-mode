@@ -19,5 +19,7 @@ export function ChromaticAberration({ effect }: { effect: ChromaticAberrationEff
     effect.offset.y = photoModeOn ? chromaticAberrationValue : 0;
   }, [effect, chromaticAberration, photoModeOn]);
 
-  return null;
+  if (!effect) return null;
+
+  return <primitive object={effect} />;
 }
