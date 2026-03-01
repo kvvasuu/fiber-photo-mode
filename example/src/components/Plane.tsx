@@ -37,7 +37,7 @@ type GLTFResult = GLTF & {
 };
 
 export function Plane() {
-  const { nodes, materials } = useGLTF("/plane.glb") as any as GLTFResult;
+  const { nodes, materials } = useGLTF(`${import.meta.env.BASE_URL}plane.glb`) as any as GLTFResult;
 
   useLayoutEffect(() => {
     Object.values(materials).forEach((mat: any) => {
@@ -119,4 +119,4 @@ export function Plane() {
   );
 }
 
-useGLTF.preload("/plane-transformed.glb");
+useGLTF.preload(`${import.meta.env.BASE_URL}plane.glb`);
