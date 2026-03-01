@@ -1,4 +1,5 @@
-import { PerspectiveCamera, Quaternion, Vector3 } from "three";
+import { Camera, PerspectiveCamera, Quaternion, Vector3 } from "three";
+import { UserCameraSnapshot } from "../../types";
 import { MAX_APERTURE, MAX_ZOOM, MIN_APERTURE } from "../constants";
 
 /**
@@ -116,4 +117,29 @@ export function apertureToFocusRange(aperture: number): number {
   const nonLinearT = Math.pow(t, power);
 
   return minRange + nonLinearT * (maxRange - minRange);
+}
+
+export function makeCameraSnapshot(camera: Camera): UserCameraSnapshot {
+  camera.updateMatrixWorld(true);
+
+  return {
+    enabled: true,
+    up: camera.up.clone(),
+    zoom: camera instanceof PerspectiveCamera ? camera.zoom : null,
+    fov: camera instanceof PerspectiveCamera ? camera.fov : null,
+    quaternion: camera.quaternion.clone(),
+  };
+}
+
+export function restoreCameraSnapshot(camera: Camera, snapshot: UserCameraSnapshot) {
+  if (!snapshot) return;
+
+  camera.up.copy(snapshot.up);
+  camera.quaternion.copy(snapshot.quaternion);
+
+  if (camera instanceof PerspectiveCamera) {
+    if (snapshot.fov != null) camera.fov = snapshot.fov;
+    if (snapshot.zoom != null) camera.zoom = snapshot.zoom;
+    camera.updateProjectionMatrix();
+  }
 }

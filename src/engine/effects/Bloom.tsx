@@ -15,5 +15,7 @@ export function Bloom({ effect }: { effect: BloomEffect }) {
     effect.intensity = photoModeOn ? mapEffectValue(bloom, "bloom") : 0;
   }, [effect, bloom, photoModeOn]);
 
-  return null;
+  if (!effect) return null;
+
+  return <primitive object={effect} />;
 }

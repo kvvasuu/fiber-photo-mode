@@ -18,5 +18,7 @@ export function HueSaturation({ effect }: { effect: HueSaturationEffect }) {
     effect.saturation = photoModeOn ? mapEffectValue(saturation, "saturation") : 0;
   }, [effect, hue, saturation, photoModeOn]);
 
-  return null;
+  if (!effect) return null;
+
+  return <primitive object={effect} />;
 }

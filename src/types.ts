@@ -1,6 +1,6 @@
 import { Camera } from "@react-three/fiber";
 import { EffectComposer } from "postprocessing";
-import { EventDispatcher, Quaternion, Scene, Vector3, WebGLRenderer } from "three";
+import { Quaternion, Scene, Vector3, WebGLRenderer } from "three";
 
 /**
  * Configuration options for screenshot capture
@@ -72,61 +72,10 @@ export type EffectDefinition = {
   effectMax?: number;
 };
 
-export interface SphericalCameraControls {
+export type UserCameraSnapshot = {
   enabled: boolean;
-  target: Vector3;
-  object: {
-    position: Vector3;
-    fov: number;
-    updateProjectionMatrix(): void;
-  };
-
-  getDistance(): number;
-  getAzimuthalAngle(): number;
-  getPolarAngle(): number;
-
-  update(): void;
-}
-
-export type UserCameraSnapshot = Partial<EventDispatcher> & {
-  type: "OrbitControls" | "CameraControls" | "StaticCamera";
-  position: Vector3;
-  zoom: number;
   up: Vector3;
-  target: Vector3;
-  enabled: boolean;
-  fov?: number;
-  quaternion?: Quaternion;
-};
-
-export interface CameraAdapter {
-  snapshot(): UserCameraSnapshot | null;
-  restore(snapshot: UserCameraSnapshot): void;
-  setEnabled(enabled: boolean): void;
-}
-
-export type OrbitControlsLike = {
-  enabled: boolean;
-  object: Camera;
-  target: Vector3;
-  getDistance: () => number;
-  getAzimuthalAngle: () => number;
-  getPolarAngle: () => number;
-  update(): void;
-};
-
-export type CameraControlsLike = {
-  enabled: boolean;
-  camera: Camera;
-  getPosition(out: Vector3): void;
-  getTarget(out: Vector3): void;
-  setLookAt(
-    positionX: number,
-    positionY: number,
-    positionZ: number,
-    targetX: number,
-    targetY: number,
-    targetZ: number,
-    enableTransition?: boolean,
-  ): Promise<void>;
+  quaternion: Quaternion;
+  zoom: number | null;
+  fov: number | null;
 };

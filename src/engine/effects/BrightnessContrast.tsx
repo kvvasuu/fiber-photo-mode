@@ -18,5 +18,7 @@ export function BrightnessContrast({ effect }: { effect: BrightnessContrastEffec
     effect.contrast = photoModeOn ? mapEffectValue(contrast, "contrast") : 0;
   }, [effect, brightness, contrast, photoModeOn]);
 
-  return null;
+  if (!effect) return null;
+
+  return <primitive object={effect} />;
 }

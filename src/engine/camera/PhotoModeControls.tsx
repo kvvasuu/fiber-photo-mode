@@ -1,43 +1,33 @@
-import { CameraControlsProps } from "@react-three/drei";
+import { CameraControls, CameraControlsProps } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { RefObject, useLayoutEffect, useRef } from "react";
+import { forwardRef, useLayoutEffect, useRef } from "react";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
 import { UserCameraSnapshot } from "../../types";
-import { createCameraAdapter } from "../../utils/cameraControllerAdapter";
+import { makeCameraSnapshot, restoreCameraSnapshot } from "../../utils/functions";
 import CameraController from "./CameraController";
 
-type Props = CameraControlsProps & {
-  controlsRef?: RefObject<any>;
-};
-
-export function PhotoModeControls({ controlsRef, ...props }: Props) {
-  const controls = useThree((s) => s.controls);
+export const PhotoModeControls = forwardRef<CameraControls, CameraControlsProps>(function PhotoModeControls(
+  { ...props },
+  ref,
+) {
   const camera = useThree((s) => s.camera);
-  const adapterObject = controlsRef?.current || controls || camera;
 
   const photoModeOn = usePhotoModeStore((s) => s.photoModeOn);
 
   const snapshotRef = useRef<UserCameraSnapshot>(null);
 
   useLayoutEffect(() => {
-    if (!photoModeOn) return;
+    if (!photoModeOn || snapshotRef.current) return;
 
-    const adapter = createCameraAdapter(adapterObject);
-
-    if (!adapter || snapshotRef.current) return;
-
-    snapshotRef.current = adapter.snapshot();
-    adapter.setEnabled(false);
+    snapshotRef.current = makeCameraSnapshot(camera);
 
     return () => {
-      if (adapter && snapshotRef.current) {
-        adapter.restore(snapshotRef.current);
+      if (snapshotRef.current) {
+        restoreCameraSnapshot(camera, snapshotRef.current);
       }
       snapshotRef.current = null;
     };
   }, [photoModeOn]);
 
-  if (!photoModeOn) return null;
-
-  return <CameraController snapshot={snapshotRef.current} {...props} />;
-}
+  return <CameraController ref={ref} snapshot={snapshotRef.current} {...props} />;
+});
