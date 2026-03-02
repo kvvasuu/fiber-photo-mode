@@ -93,6 +93,38 @@ export function setCameraRoll(camera: PerspectiveCamera, rollRad: number) {
 }
 
 /**
+ * Maps camera aperture (f-stop) to Depth of Field parameters.
+ *
+ * Returns both focusRange and bokehScale values for DepthOfFieldEffect:
+ * - focusRange: Increases with aperture (narrow apertures → deep DOF)
+ * - bokehScale: Decreases with aperture (wide apertures → strong bokeh)
+ *
+ * Both use exponential curves for realistic camera behavior.
+ * Values are rounded to 2 decimal places for cleaner output.
+ *
+ * @param aperture - F-stop value (clamped to [MIN_APERTURE, MAX_APERTURE])
+ * @returns Object with focusRange (world units) and bokehScale (multiplier)
+ */
+export function apertureToDOFParams(aperture: number): { focusRange: number; bokehScale: number } {
+  const clamped = Math.max(MIN_APERTURE, Math.min(aperture, MAX_APERTURE));
+
+  // normalize to [0,1] for focusRange (direct) and bokehScale (inverted)
+  const focusT = (clamped - MIN_APERTURE) / (MAX_APERTURE - MIN_APERTURE);
+  const bokehT = (MAX_APERTURE - clamped) / (MAX_APERTURE - MIN_APERTURE);
+
+  // exponential curves with different bases for optimal behavior
+  const focusBase = 4.0;
+  const bokehBase = 2.5;
+  const focusExponentialT = (Math.exp(focusBase * focusT) - 1) / (Math.exp(focusBase) - 1);
+  const bokehExponentialT = (Math.exp(bokehBase * bokehT) - 1) / (Math.exp(bokehBase) - 1);
+
+  // calculate final values and round to 2 decimal places
+  const focusRange = Math.round((0.5 + focusExponentialT * (200.0 - 0.5)) * 100) / 100;
+  const bokehScale = Math.round((3.0 + bokehExponentialT * (12.0 - 3.0)) * 100) / 100;
+
+  return { focusRange, bokehScale };
+}
+/**
  * Maps camera aperture (f-stop) to perceptual Depth of Field range (non-linear).
  *
  * Smaller f-stop (wider aperture) → shallow DOF → small focusRange
@@ -105,18 +137,18 @@ export function setCameraRoll(camera: PerspectiveCamera, rollRad: number) {
  */
 export function apertureToFocusRange(aperture: number): number {
   const minRange = 0.5; // shallow DOF
-  const maxRange = 50.0; // deep DOF (practically infinity)
+  const maxRange = 200.0; // deep DOF (practically infinity)
 
   const clamped = Math.max(MIN_APERTURE, Math.min(aperture, MAX_APERTURE));
 
   // normalize to [0,1]
   const t = (clamped - MIN_APERTURE) / (MAX_APERTURE - MIN_APERTURE);
 
-  // non-linear mapping: t^power gives faster growth at high f-stop
-  const power = 2.5; // tweak for desired curve
-  const nonLinearT = Math.pow(t, power);
+  // exponential function: exp(base * t) - 1
+  const base = 4.0; // controls growth rate
+  const exponentialT = (Math.exp(base * t) - 1) / (Math.exp(base) - 1);
 
-  return minRange + nonLinearT * (maxRange - minRange);
+  return minRange + exponentialT * (maxRange - minRange);
 }
 
 export function makeCameraSnapshot(camera: Camera): UserCameraSnapshot {

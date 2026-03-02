@@ -7,7 +7,7 @@ import { Vector3 } from "three";
 import { CameraStore, useCameraStore } from "../../store/CameraStore";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
 import { MAX_APERTURE, MIN_APERTURE } from "../../utils/constants";
-import { apertureToFocusRange } from "../../utils/functions";
+import { apertureToDOFParams } from "../../utils/functions";
 
 interface AutoFocusPassHandle {
   dofRef: RefObject<DepthOfFieldEffect>;
@@ -49,6 +49,7 @@ export function AutoFocus({
 
   const autoFocus = useCameraStore((state) => state.autoFocus);
   const DOFEnabled = useCameraStore((state) => state.DOFEnabled);
+  const focusDistance = useCameraStore((state) => state.focusDistance);
 
   /** DepthPickingPass used to read per-pixel depth from the buffer */
   const [depthPickingPass] = useState(() => new DepthPickingPass());
@@ -88,10 +89,8 @@ export function AutoFocus({
 
     if (!autoFocus) {
       // MANUAL MODE: move focus straight ahead from the camera
-      const distance = useCameraStore.getState().focusDistance;
-
       camera.getWorldDirection(_cameraDir.current);
-      hitpointRef.current.copy(camera.position).addScaledVector(_cameraDir.current, distance);
+      hitpointRef.current.copy(camera.position).addScaledVector(_cameraDir.current, focusDistance);
     } else {
       // AUTOFOCUS MODE: sample depth from screen center
       const ndc = ndcRef.current;
@@ -137,9 +136,11 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
   useEffect(() => {
     if (!camera) return;
 
+    const { bokehScale, focusRange } = apertureToDOFParams(aperture);
+
     const dofEffect = new DepthOfFieldEffect(camera, {
-      bokehScale: 7,
-      focusRange: apertureToFocusRange(aperture) || 2,
+      bokehScale: bokehScale,
+      focusRange: focusRange,
     });
 
     dofEffect.target = new Vector3();
@@ -180,9 +181,10 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
   useEffect(() => {
     if (!dofRef.current) return;
 
-    const focusRange = apertureToFocusRange(aperture);
+    const { bokehScale, focusRange } = apertureToDOFParams(aperture);
 
-    dofRef.current.cocMaterial.uniforms.focusRange.value = focusRange;
+    if (bokehScale) dofRef.current.bokehScale = bokehScale;
+    if (focusRange) dofRef.current.cocMaterial.uniforms.focusRange.value = focusRange;
   }, [aperture]);
 
   return null;
