@@ -93,8 +93,8 @@ body {
     opacity: 1;
     z-index: 1;
     background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+      linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 33.33% 33.33%;
   }
 
@@ -260,7 +260,7 @@ body {
 
 .footer {
   position: absolute;
-  bottom: 0.25rem;
+  bottom: 0.1rem;
   width: 100%;
   text-align: center;
   font-family: "Ubuntu";
@@ -268,6 +268,7 @@ body {
   font-size: 0.6rem;
   user-select: none;
   pointer-events: all;
+  z-index: 10;
 
   a {
     color: var(--text-main);

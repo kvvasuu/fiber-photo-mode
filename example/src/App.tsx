@@ -11,31 +11,32 @@ export default function App() {
   const [showOverlay, setShowOverlay] = useState(false);
 
   const { togglePhotoMode } = usePhotoMode();
-  const { setFocalLength, setAperture } = usePhotoModeCamera();
+  const { setFocalLength } = usePhotoModeCamera();
 
   useEffect(() => {
     togglePhotoMode(true);
     setFocalLength(14);
-    setAperture(20);
 
     if (!controlsRef.current) return;
     controlsRef.current.enabled = false;
 
     controlsRef.current.setLookAt(-7, 5, -8, -1, 1.3, 2, false);
-    controlsRef.current.setLookAt(-2.5, 1.4, -1.2, -1.2, 2, 2, true);
+    requestAnimationFrame(() => {
+      controlsRef?.current?.setLookAt(-2.5, 1.4, -1.2, -1.2, 2, 2, true);
+    });
 
     setTimeout(() => {
       setShowOverlay(true);
       if (controlsRef.current) controlsRef.current.enabled = true;
-    }, 1500);
-  }, [setAperture, setFocalLength, togglePhotoMode, controlsRef.current]);
+    }, 1700);
+  }, [setFocalLength, togglePhotoMode, controlsRef.current]);
 
   return (
     <>
       <Canvas gl={{ powerPreference: "high-performance" }} camera={{ fov: 80, far: 100 }}>
         <Suspense fallback={null}>
           <PhotoMode />
-          <AutoFocus />
+          <AutoFocus initialAperture={18} initialAutoFocus={true} initialDOFEnabled={true} />
           <PhotoModeControls makeDefault ref={controlsRef} smoothTime={0.7} maxDistance={20} />
 
           <Scene />
