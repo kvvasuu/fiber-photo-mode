@@ -4,12 +4,20 @@ import { forwardRef, RefObject, useEffect, useImperativeHandle, useRef, useState
 
 import { easing } from "maath";
 import { Vector3 } from "three";
-import { useCameraStore } from "../../store/CameraStore";
+import { CameraStore, useCameraStore } from "../../store/CameraStore";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
+import { MAX_APERTURE, MIN_APERTURE } from "../../utils/constants";
 import { apertureToFocusRange } from "../../utils/functions";
 
 interface AutoFocusPassHandle {
   dofRef: RefObject<DepthOfFieldEffect>;
+}
+
+interface AutoFocusProps {
+  initialAutoFocus?: boolean;
+  initialDOFEnabled?: boolean;
+  initialAperture?: number;
+  initialFocusDistance?: number;
 }
 
 /**
@@ -20,7 +28,12 @@ interface AutoFocusPassHandle {
  *   - Manual: fixed distance along the camera forward direction
  *   - Auto: calculates the nearest object depth from the camera (center of screen)
  */
-export function AutoFocus() {
+export function AutoFocus({
+  initialAutoFocus,
+  initialDOFEnabled,
+  initialAperture,
+  initialFocusDistance,
+}: AutoFocusProps) {
   const autoFocusPassRef = useRef<AutoFocusPassHandle>(null);
 
   const hitpointRef = useRef(new Vector3());
@@ -40,6 +53,19 @@ export function AutoFocus() {
   /** DepthPickingPass used to read per-pixel depth from the buffer */
   const [depthPickingPass] = useState(() => new DepthPickingPass());
   const [copyPass] = useState(() => new CopyPass());
+
+  useEffect(() => {
+    const updates: Partial<CameraStore> = {};
+    if (initialAutoFocus !== undefined) updates.autoFocus = initialAutoFocus;
+    if (initialDOFEnabled !== undefined) updates.DOFEnabled = initialDOFEnabled;
+    if (initialAperture !== undefined)
+      updates.aperture = Math.min(MAX_APERTURE, Math.max(MIN_APERTURE, initialAperture));
+    if (initialFocusDistance !== undefined) updates.focusDistance = initialFocusDistance;
+
+    if (Object.keys(updates).length > 0) {
+      useCameraStore.setState(updates);
+    }
+  }, []);
 
   useEffect(() => {
     if (!composer || !camera) return;

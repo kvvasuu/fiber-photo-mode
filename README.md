@@ -141,16 +141,15 @@ export function PhotoModeUI() {
   if (!photoModeOn) return null;
 
   return (
-    <>
-      <input
-        type="range"
-        value={brightness}
-        onChange={(e) => setEffect("brightness", parseFloat(e.target.value))}
-        min={-1}
-        max={1}
-        step={0.01}
-        className="w-full"
-      />
+    <input
+      type="range"
+      value={brightness}
+      onChange={(e) => setEffect("brightness", parseFloat(e.target.value))}
+      min={-1}
+      max={1}
+      step={0.01}
+      className="w-full"
+    />
   );
 }
 ```

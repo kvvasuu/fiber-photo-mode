@@ -72,7 +72,7 @@ export const ENABLED_EFFECTS: Record<EffectName, boolean> = {
 
 // Aperture (f-stop) limits
 export const MIN_APERTURE = 1;
-export const MAX_APERTURE = 22;
+export const MAX_APERTURE = 30;
 
 // Focal length limits in millimeters
 export const MIN_FOCAL_LENGTH = 4;

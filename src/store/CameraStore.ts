@@ -1,7 +1,7 @@
 import { createWithEqualityFn } from "zustand/traditional";
 import { MAX_APERTURE, MAX_FOCAL_LENGTH, MIN_APERTURE, MIN_FOCAL_LENGTH } from "../utils/constants";
 
-type CameraStore = {
+export type CameraStore = {
   focalLength: number; // mm (24, 35, 50, 85, 135, 200)
   aperture: number; // f-stop (1.4, 2.8, 5.6, 8, 11, 16, 22)
   focusDistance: number;
@@ -28,11 +28,11 @@ const equalityFn = <T>(a: T, b: T) => a === b;
 export const useCameraStore = createWithEqualityFn<CameraStore>(
   (set, _get, store) => ({
     focalLength: 50,
-    aperture: 2.8,
+    aperture: 5.6,
     focusDistance: 5,
 
-    autoFocus: true,
-    DOFEnabled: true,
+    autoFocus: false,
+    DOFEnabled: false,
 
     rotation: 0,
 
