@@ -18,18 +18,11 @@
   /* Base colors */
   --color-background: hsl(220 20% 10%);
   --color-foreground: hsl(0, 0%, 92%);
-
   --color-secondary: hsl(220 15% 20%);
-
   --color-muted-foreground: hsl(215, 17%, 75%);
-
   --color-accent: hsl(200 85% 55%);
-
   --color-border: hsl(220 15% 25%);
-
-  /* Photo mode tokens */
   --color-panel-border: hsl(200 30% 30% / 0.3);
-
   --color-tab-inactive: hsl(215 15% 45%);
 
   /* Fonts */

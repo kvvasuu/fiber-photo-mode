@@ -14,7 +14,7 @@
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "@tailwindcss/vite": "^4.2.1",
-    "fiber-photo-mode": "^0.4.6",
+    "fiber-photo-mode": "^0.4.7",
     "lucide-react": "^0.576.0",
     "motion": "^12.34.3",
     "react": "^19.2.0",

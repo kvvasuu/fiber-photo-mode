@@ -1,3 +1,5 @@
+import { useRef, type ReactNode } from "react";
+
 interface SliderControlProps {
   label: string;
   value: number;
@@ -9,10 +11,30 @@ interface SliderControlProps {
 }
 
 export const SliderControl = ({ label, value, min, max, step = 1, unit = "", onChange }: SliderControlProps) => {
+  const trackRef = useRef<HTMLDivElement>(null);
   const percentage = ((value - min) / (max - min)) * 100;
 
+  const getValueFromPointer = (clientX: number) => {
+    const rect = trackRef.current!.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const raw = min + ratio * (max - min);
+    const stepped = Math.round((raw - min) / step) * step + min;
+    return Math.max(min, Math.min(max, stepped));
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    onChange(getValueFromPointer(e.clientX));
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      onChange(getValueFromPointer(e.clientX));
+    }
+  };
+
   return (
-    <div className="mb-2.5 last:mb-0">
+    <div className="mb-2.5 last:mb-0 select-none" draggable="false">
       <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] font-medium uppercase tracking-wider text-foreground/40">{label}</span>
         <span className="font-mono text-[10px] text-foreground/70 tabular-nums">
@@ -20,32 +42,25 @@ export const SliderControl = ({ label, value, min, max, step = 1, unit = "", onC
           {unit}
         </span>
       </div>
-      <div className="relative h-4 flex items-center">
-        <div className="absolute inset-y-0 left-0 right-0 flex items-center">
-          <div className="h-0.5 w-full rounded-full bg-foreground/10 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${percentage}%`,
-                background: "linear-gradient(90deg, hsl(200,85%,55%), hsl(200,75%,65%))",
-              }}
-            />
-          </div>
+      <div
+        ref={trackRef}
+        className="relative flex items-center w-full h-4 cursor-pointer"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+      >
+        <div className="absolute w-full h-0.5 rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${percentage}%`,
+              background: "linear-gradient(90deg, hsl(200,85%,55%), hsl(200,75%,65%))",
+            }}
+          />
         </div>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="absolute inset-0 w-full cursor-pointer opacity-0"
-        />
         <div
-          className="pointer-events-none absolute h-2.5 w-2.5 rounded-full transition-all"
+          className="absolute w-2.5 h-2.5 rounded-full bg-[hsl(0,0%,95%)] pointer-events-none"
           style={{
             left: `calc(${percentage}% - 5px)`,
-            background: "hsl(0,0%,95%)",
             boxShadow: "0 0 6px hsla(200,85%,55%,0.4)",
           }}
         />
@@ -62,7 +77,7 @@ interface SwitchControlProps {
 
 export const SwitchControl = ({ label, checked, onChange }: SwitchControlProps) => {
   return (
-    <div className="flex items-center justify-between mb-2.5 last:mb-0">
+    <div className="flex items-center justify-between mb-2.5 last:mb-0 select-none" draggable="false">
       <span className="text-[10px] font-medium uppercase tracking-wider text-foreground/40">{label}</span>
       <button
         onClick={() => onChange(!checked)}
@@ -84,8 +99,28 @@ export const SwitchControl = ({ label, checked, onChange }: SwitchControlProps) 
   );
 };
 
-export const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-2 mt-3 first:mt-0 pb-1" style={{ borderBottom: "1px solid hsla(200,30%,50%,0.1)" }}>
+export const SectionLabel = ({
+  children,
+  resetButton,
+  onReset,
+}: {
+  children: ReactNode;
+  resetButton?: boolean;
+  onReset?: () => void;
+}) => (
+  <div
+    className="mb-2 mt-3 first:mt-0 pb-1 select-none flex flex-row justify-between items-end border-b border-accent/10"
+    draggable="false"
+  >
     <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-accent/70">{children}</span>
+
+    {resetButton && (
+      <button
+        className="rounded transition-colors hover:bg-background/50 hover:text-red-400 px-1.5 py-0.5 text-[10px] font-bold uppercase  text-red-500/50 cursor-pointer"
+        onClick={onReset}
+      >
+        RESET
+      </button>
+    )}
   </div>
 );

@@ -41,7 +41,7 @@ export const PresetsTab = () => {
         />
         <button
           onClick={handleSave}
-          className="flex items-center gap-1.5 rounded-lg bg-slider-fill px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-80"
+          className="flex items-center gap-1.5 rounded-lg bg-slider-fill px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:text-accent cursor-pointer"
         >
           <Save size={12} />
         </button>
@@ -62,12 +62,15 @@ export const PresetsTab = () => {
               <span className="text-xs font-medium text-foreground">{preset.name}</span>
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="rounded p-1 text-tab-inactive hover:text-accent transition-colors" title="Load">
+              <button
+                className="rounded p-1 text-tab-inactive hover:text-accent transition-colors cursor-pointer"
+                title="Load"
+              >
                 <Upload size={12} />
               </button>
               <button
                 onClick={() => handleDelete(preset.id)}
-                className="rounded p-1 text-tab-inactive hover:text-destructive transition-colors"
+                className="rounded p-1 text-tab-inactive hover:text-red-400 transition-colors cursor-pointer"
                 title="Delete"
               >
                 <Trash2 size={12} />

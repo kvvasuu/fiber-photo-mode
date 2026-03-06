@@ -1,71 +1,122 @@
-import { useState } from "react";
-import { SectionLabel, SliderControl, SwitchControl } from "../PhotoModeControls.tsx";
+import { usePhotoModeEffects } from "fiber-photo-mode";
+import { SectionLabel, SliderControl } from "../PhotoModeControls.tsx";
 
 export const EffectsTab = () => {
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [saturation, setSaturation] = useState(100);
-  const [hue, setHue] = useState(0);
-  const [bloom, setBloom] = useState(false);
-  const [bloomIntensity, setBloomIntensity] = useState(0.5);
-  const [vignette, setVignette] = useState(false);
-  const [vignetteIntensity, setVignetteIntensity] = useState(0.5);
-  const [grain, setGrain] = useState(false);
-  const [grainIntensity, setGrainIntensity] = useState(0.3);
-  const [chromatic, setChromatic] = useState(false);
-  const [chromaticOffset, setChromaticOffset] = useState(0.5);
+  const {
+    brightness,
+    contrast,
+    hue,
+    saturation,
+    bloom,
+    vignette,
+    grain,
+    chromaticAberration,
+    setEffect,
+    resetEffects,
+  } = usePhotoModeEffects();
+
+  const hasColor = brightness != null || contrast != null || saturation != null || hue != null;
+
+  const hasPostProcessing = bloom != null || vignette != null || grain != null || chromaticAberration != null;
 
   return (
     <>
-      <SectionLabel>Color</SectionLabel>
-      <SliderControl label="Brightness" value={brightness} min={0} max={200} unit="%" onChange={setBrightness} />
-      <SliderControl label="Contrast" value={contrast} min={0} max={200} unit="%" onChange={setContrast} />
-      <SliderControl label="Saturation" value={saturation} min={0} max={200} unit="%" onChange={setSaturation} />
-      <SliderControl label="Hue Shift" value={hue} min={-180} max={180} unit="°" onChange={setHue} />
+      {hasColor && (
+        <SectionLabel resetButton onReset={() => resetEffects()}>
+          Color
+        </SectionLabel>
+      )}
 
-      <SectionLabel>Post-Processing</SectionLabel>
-      <SwitchControl label="Bloom" checked={bloom} onChange={setBloom} />
-      {bloom && (
+      {brightness != null && (
         <SliderControl
-          label="Intensity"
-          value={bloomIntensity}
-          min={0}
-          max={2}
+          label="Brightness"
+          value={brightness}
+          min={-1}
           step={0.01}
-          onChange={setBloomIntensity}
+          max={1}
+          unit="%"
+          onChange={(val) => setEffect("brightness", val)}
         />
       )}
-      <SwitchControl label="Vignette" checked={vignette} onChange={setVignette} />
-      {vignette && (
+
+      {contrast != null && (
         <SliderControl
-          label="Intensity"
-          value={vignetteIntensity}
+          label="Contrast"
+          value={contrast}
+          min={-1}
+          step={0.01}
+          max={1}
+          unit="%"
+          onChange={(val) => setEffect("contrast", val)}
+        />
+      )}
+
+      {saturation != null && (
+        <SliderControl
+          label="Saturation"
+          value={saturation}
+          min={-1}
+          step={0.01}
+          max={1}
+          unit="%"
+          onChange={(val) => setEffect("saturation", val)}
+        />
+      )}
+
+      {hue != null && (
+        <SliderControl
+          label="Hue Shift"
+          value={hue}
+          min={-1}
+          step={0.01}
+          max={1}
+          unit="°"
+          onChange={(val) => setEffect("hue", val)}
+        />
+      )}
+
+      {hasPostProcessing && <SectionLabel>Post-Processing</SectionLabel>}
+
+      {bloom != null && (
+        <SliderControl
+          label="Bloom"
+          value={bloom}
           min={0}
           max={1}
-          step={0.01}
-          onChange={setVignetteIntensity}
+          step={0.05}
+          onChange={(val) => setEffect("bloom", val)}
         />
       )}
-      <SwitchControl label="Film Grain" checked={grain} onChange={setGrain} />
-      {grain && (
+      {vignette != null && (
         <SliderControl
-          label="Intensity"
-          value={grainIntensity}
+          label="Vignette"
+          value={vignette}
           min={0}
           max={1}
-          step={0.01}
-          onChange={setGrainIntensity}
+          step={0.05}
+          onChange={(val) => setEffect("vignette", val)}
         />
       )}
-      <SwitchControl label="Chromatic Ab." checked={chromatic} onChange={setChromatic} />
-      {chromatic && (
+
+      {grain != null && (
         <SliderControl
-          label="Offset"
-          value={chromaticOffset}
+          label="Grain"
+          value={grain}
           min={0}
-          max={2}
-          step={0.01}
-          onChange={setChromaticOffset}
+          max={1}
+          step={0.05}
+          onChange={(val) => setEffect("grain", val)}
+        />
+      )}
+
+      {chromaticAberration != null && (
+        <SliderControl
+          label="Chromatic Aberration"
+          value={chromaticAberration}
+          min={0}
+          max={1}
+          step={0.05}
+          onChange={(val) => setEffect("chromaticAberration", val)}
         />
       )}
     </>
