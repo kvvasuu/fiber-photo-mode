@@ -1,6 +1,6 @@
 import { CameraControls, CameraControlsProps } from "@react-three/drei";
 import { degToRad } from "maath/misc";
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, RefObject, useEffect, useImperativeHandle, useRef } from "react";
 import { PerspectiveCamera } from "three";
 import { useCameraStore } from "../../store/CameraStore";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
@@ -9,7 +9,7 @@ import { MAX_ZOOM } from "../../utils/constants";
 import { focalLengthToZoom, setCameraRoll } from "../../utils/functions";
 
 type Props = CameraControlsProps & {
-  snapshot: UserCameraSnapshot | null;
+  snapshot: RefObject<UserCameraSnapshot | null>;
 };
 
 /**
@@ -24,7 +24,7 @@ const CameraController = forwardRef<CameraControls, Props>(function CameraContro
 ) {
   const internalRef = useRef<CameraControls>(null);
 
-  useImperativeHandle(externalRef, () => internalRef.current!, []);
+  useImperativeHandle(externalRef, () => internalRef.current!);
 
   const focalLength = useCameraStore((state) => state.focalLength);
   const rotation = useCameraStore((state) => state.rotation);
@@ -32,11 +32,11 @@ const CameraController = forwardRef<CameraControls, Props>(function CameraContro
   const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
 
   useEffect(() => {
-    if (!internalRef.current || !snapshot || !photoModeOn) return;
+    if (!internalRef.current || !snapshot.current || !photoModeOn) return;
 
-    const zoom = focalLengthToZoom(snapshot?.fov || 50, focalLength);
+    const zoom = focalLengthToZoom(snapshot?.current.fov || 50, focalLength);
     internalRef.current.zoomTo(zoom, true);
-  }, [focalLength, snapshot]);
+  }, [focalLength, snapshot, photoModeOn]);
 
   useEffect(() => {
     if (!internalRef.current || !photoModeOn) return;

@@ -1,6 +1,6 @@
 {
   "name": "fiber-photo-mode",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "author": "Łukasz Kwas (https://github.com/kvvasuu)",
   "description": "A React Three Fiber component to add photo mode functionality to your 3D scenes.",
   "license": "MIT",

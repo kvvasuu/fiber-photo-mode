@@ -78,4 +78,4 @@ export const MAX_APERTURE = 30;
 export const MIN_FOCAL_LENGTH = 4;
 export const MAX_FOCAL_LENGTH = 300;
 
-export const MAX_ZOOM = 8;
+export const MAX_ZOOM = 20;

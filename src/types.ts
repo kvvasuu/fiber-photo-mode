@@ -73,9 +73,7 @@ export type EffectDefinition = {
 };
 
 export type UserCameraSnapshot = {
-  enabled: boolean;
   up: Vector3;
   quaternion: Quaternion;
-  zoom: number | null;
   fov: number | null;
 };
