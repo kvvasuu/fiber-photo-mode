@@ -14,7 +14,6 @@ export default function App() {
   const { setFocalLength } = usePhotoModeCamera();
 
   useEffect(() => {
-    togglePhotoMode(true);
     setFocalLength(14);
 
     if (!controlsRef.current) return;
@@ -23,6 +22,7 @@ export default function App() {
     controlsRef.current.setLookAt(-7, 5, -8, -1, 1.3, 2, false);
     requestAnimationFrame(() => {
       controlsRef?.current?.setLookAt(-2.5, 1.4, -1.2, -1.2, 2, 2, true);
+      togglePhotoMode(true);
     });
 
     setTimeout(() => {
@@ -36,8 +36,8 @@ export default function App() {
       <Canvas gl={{ powerPreference: "high-performance" }} camera={{ fov: 80, far: 100 }}>
         <Suspense fallback={null}>
           <PhotoMode />
-          <AutoFocus initialAperture={18} initialDOFEnabled={true} />
-          <PhotoModeControls makeDefault ref={controlsRef} smoothTime={0.7} maxDistance={20} />
+          <AutoFocus initialAperture={18} initialDOFEnabled={true} initialAutoFocus={true} />
+          <PhotoModeControls makeDefault restoreOnClose ref={controlsRef} smoothTime={0.7} maxDistance={20} />
 
           <Scene />
 
