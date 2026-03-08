@@ -1,13 +1,17 @@
 import { usePhotoMode } from "fiber-photo-mode";
-import { Aperture, Camera, Eye, EyeOff, Space } from "lucide-react";
+import { Aperture, Camera, Eye, EyeOff, Moon, Space, Sun } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useMainStore } from "../store";
 import { PhotoModePanel } from "./photo-mode-panel/PhotoModePanel";
 
-export default function UserInterface({ show }: { show?: boolean }) {
+export default function UserInterface() {
   const { photoModeOn, takeScreenshot, togglePhotoMode } = usePhotoMode();
 
   const [uiVisible, setUiVisible] = useState(true);
+
+  const isDay = useMainStore((state) => state.isDay);
+  const toggleDay = useMainStore((state) => state.toggleDay);
 
   const handleTakeScreenshot = async () => {
     if (!takeScreenshot || !photoModeOn) return;
@@ -40,13 +44,7 @@ export default function UserInterface({ show }: { show?: boolean }) {
   }, [handleTakeScreenshot]);
 
   return (
-    <motion.div
-      className="absolute z-10 inset-0"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: show ? 1 : 0 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="absolute z-10 inset-0">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: photoModeOn && uiVisible ? 1 : 0 }}
@@ -91,6 +89,24 @@ export default function UserInterface({ show }: { show?: boolean }) {
           </div>
         </>
       </motion.div>
+
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        className="absolute top-6 right-6 z-50  group bg-background/50 border border-panel-border backdrop-blur-md rounded-lg p-2.5 transition-colors pointer-events-auto cursor-pointer"
+        onClick={toggleDay}
+        title={"Toogle day"}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 22 }}
+        key="isDay"
+      >
+        {isDay ? (
+          <Sun size={16} className="text-foreground/40 group-hover:text-foreground/70 transition-colors" />
+        ) : (
+          <Moon size={16} className="text-foreground/40 group-hover:text-foreground/70 transition-colors" />
+        )}
+      </motion.button>
 
       {/* Bottom-right controls */}
       <div className="absolute hidden sm:flex bottom-6 right-6 z-50  items-center gap-2">
@@ -158,6 +174,6 @@ export default function UserInterface({ show }: { show?: boolean }) {
       </div>
 
       <AnimatePresence initial={false}>{photoModeOn && uiVisible && <PhotoModePanel />}</AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
