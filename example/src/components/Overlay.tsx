@@ -4,7 +4,8 @@ import UserInterface from "./UserInterface";
 export default function Overlay({ show }: { show?: boolean }) {
   return (
     <motion.div
-      className="absolute inset-0 z-10 pointer-events-none"
+      className="absolute inset-0 z-10 pointer-events-none select-none"
+      draggable={false}
       initial={{ opacity: 0 }}
       animate={{ opacity: show ? 1 : 0 }}
       exit={{ opacity: 0 }}
@@ -20,7 +21,7 @@ export default function Overlay({ show }: { show?: boolean }) {
         <span className="-mt-2 pl-px text-xs">by Kvvasu</span>
       </a>
 
-      <UserInterface show={show} />
+      <UserInterface />
 
       <footer className="absolute bottom-0.5 text-center w-full text-foreground/75 text-[0.6rem] select-none pointer-events-auto z-10">
         <a

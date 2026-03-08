@@ -17,6 +17,3 @@ npm-debug.log*
 
 # build output
 /dist
-
-# example
-/example/src/components/wip
