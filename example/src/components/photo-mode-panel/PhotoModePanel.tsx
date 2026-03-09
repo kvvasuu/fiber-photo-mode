@@ -1,14 +1,16 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { BookMarked, Camera, Sparkles } from "lucide-react";
+import { BookMarked, Camera, ImageDown, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { CameraTab } from "./tabs/CameraTab";
 import { EffectsTab } from "./tabs/EffectsTab";
+import { OutputTab } from "./tabs/OutputTab";
 import { PresetsTab } from "./tabs/PresetsTab";
 
 const tabs = [
   { id: "camera", icon: Camera, label: "Camera" },
   { id: "effects", icon: Sparkles, label: "Effects" },
   { id: "presets", icon: BookMarked, label: "Presets" },
+  { id: "output", icon: ImageDown, label: "Output" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -77,6 +79,7 @@ export const PhotoModePanel = () => {
               {activeTab === "camera" && <CameraTab />}
               {activeTab === "effects" && <EffectsTab />}
               {activeTab === "presets" && <PresetsTab />}
+              {activeTab === "output" && <OutputTab />}
             </motion.div>
           </AnimatePresence>
         </div>
