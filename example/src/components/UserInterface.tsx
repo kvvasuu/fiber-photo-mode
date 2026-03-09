@@ -4,6 +4,7 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useMainStore } from "../store";
 import { PhotoModePanel } from "./photo-mode-panel/PhotoModePanel";
+import { positionVectors } from "./photo-mode-panel/tabs/OutputTab";
 
 export default function UserInterface() {
   const { photoModeOn, takeScreenshot, togglePhotoMode } = usePhotoMode();
@@ -18,13 +19,30 @@ export default function UserInterface() {
   const quality = useMainStore((state) => state.quality);
   const format = useMainStore((state) => state.format);
   const output = useMainStore((state) => state.output);
+  const overridePosition = useMainStore((state) => state.overridePosition);
+  const overridePositionVec = useMainStore((state) => state.overridePositionVec);
 
   const returnType = output === "New Tab" ? "objectURL" : "file";
 
   const handleTakeScreenshot = async () => {
     if (!takeScreenshot || !photoModeOn) return;
 
-    const screenshot = await takeScreenshot({ width, height, format, quality, returnType });
+    const screenshot = await takeScreenshot({
+      width,
+      height,
+      format,
+      quality,
+      returnType,
+      onBeforeScreenshot: async ({ camera }) => {
+        if (overridePosition && overridePositionVec) {
+          const vec = positionVectors.find((pos) => pos.label === overridePositionVec);
+          if (vec) {
+            camera.position.set(vec.vec.x, vec.vec.y, vec.vec.z);
+            camera.lookAt(0.5, 1, 0.5);
+          }
+        }
+      },
+    });
 
     const a = document.createElement("a");
     a.download = `Screenshot.jpg`;

@@ -21,7 +21,16 @@ export const CameraTab = () => {
     <>
       <SectionLabel>Lens</SectionLabel>
       <SliderControl label="Focal Length" value={focalLength} min={12} max={200} unit="mm" onChange={setFocalLength} />
-      <SliderControl label="Aperture" value={aperture} min={1.4} max={22} step={0.1} unit="ƒ" onChange={setAperture} />
+      <SliderControl
+        label="Aperture"
+        value={aperture}
+        min={1.4}
+        max={22}
+        step={0.1}
+        unit="ƒ"
+        onChange={setAperture}
+        format={(v) => v.toFixed(1)}
+      />
 
       <SectionLabel resetButton onReset={() => setRotation(0)}>
         Position
@@ -42,6 +51,7 @@ export const CameraTab = () => {
               step={0.1}
               unit="m"
               onChange={setFocusDistance}
+              format={(v) => v.toFixed(1)}
             />
           )}
         </>

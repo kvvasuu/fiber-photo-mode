@@ -1,5 +1,6 @@
+import { Vector3 } from "three";
 import { useMainStore } from "../../../store";
-import { SectionLabel, SliderControl } from "../PhotoModeControls";
+import { SectionLabel, SliderControl, SwitchControl } from "../PhotoModeControls";
 
 const formats = ["png", "jpeg", "webp", "avif"] as const;
 export type Format = (typeof formats)[number];
@@ -11,6 +12,17 @@ const presets = [
   { label: "Square", w: 1080, h: 1080 },
 ];
 
+export const positionVectors = [
+  {
+    label: "Pos 1",
+    vec: new Vector3(2.01, 7.42, 16.36),
+  },
+  {
+    label: "Pos 2",
+    vec: new Vector3(18, 2, 5),
+  },
+];
+
 const outputTypes = ["New Tab", "Download"];
 export type Output = (typeof outputTypes)[number];
 
@@ -20,6 +32,8 @@ export const OutputTab = () => {
   const quality = useMainStore((state) => state.quality);
   const format = useMainStore((state) => state.format);
   const output = useMainStore((state) => state.output);
+  const overridePosition = useMainStore((state) => state.overridePosition);
+  const overridePositionVec = useMainStore((state) => state.overridePositionVec);
 
   return (
     <>
@@ -97,6 +111,30 @@ export const OutputTab = () => {
           {width / gcd(width, height)}:{height / gcd(width, height)}
         </span>
       </div>
+
+      <SectionLabel>Override Camera Position</SectionLabel>
+      <SwitchControl
+        label="Enabled"
+        checked={overridePosition}
+        onChange={(v) => useMainStore.setState({ overridePosition: v })}
+      />
+      {overridePosition && (
+        <div className="flex gap-1.5 mb-3">
+          {positionVectors.map((pos) => (
+            <button
+              key={pos.label}
+              onClick={() => useMainStore.setState({ overridePositionVec: pos.label })}
+              className="rounded-md px-3 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+              style={{
+                background: overridePositionVec === pos.label ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.15)",
+                color: overridePositionVec === pos.label ? "hsl(220,25%,8%)" : "hsla(0,0%,95%,0.5)",
+              }}
+            >
+              {pos.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <SectionLabel>Output</SectionLabel>
       <div className="flex gap-1.5 mb-3">

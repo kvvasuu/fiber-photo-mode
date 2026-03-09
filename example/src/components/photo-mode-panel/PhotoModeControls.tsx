@@ -92,7 +92,7 @@ export const SwitchControl = ({ label, checked, onChange }: SwitchControlProps) 
       <span className="text-[10px] font-medium uppercase tracking-wider text-foreground/40">{label}</span>
       <button
         onClick={() => onChange(!checked)}
-        className="relative h-4 w-7 rounded-full transition-colors"
+        className="relative h-4 w-7 rounded-full transition-colors cursor-pointer"
         style={{
           background: checked ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.25)",
         }}

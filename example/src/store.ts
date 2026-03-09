@@ -11,6 +11,8 @@ export type Store = {
   quality: number;
   format: Format;
   output: Output;
+  overridePosition: boolean;
+  overridePositionVec: string;
 };
 
 export const useMainStore = create<Store>((set) => ({
@@ -23,7 +25,9 @@ export const useMainStore = create<Store>((set) => ({
 
   width: 1920,
   height: 1080,
-  quality: 95,
+  quality: 0.95,
   format: "jpeg",
   output: "New Tab",
+  overridePosition: false,
+  overridePositionVec: "Pos 1",
 }));
