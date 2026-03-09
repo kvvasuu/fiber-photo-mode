@@ -8,7 +8,7 @@ import { UserCameraSnapshot } from "../../types";
 import { MAX_ZOOM } from "../../utils/constants";
 import { focalLengthToZoom, setCameraRoll } from "../../utils/functions";
 
-type Props = Omit<CameraControlsProps, "regress" | "onControlStart"> & {
+type Props = CameraControlsProps & {
   snapshot: RefObject<UserCameraSnapshot | null>;
 };
 

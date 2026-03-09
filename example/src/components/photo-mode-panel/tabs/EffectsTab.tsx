@@ -36,6 +36,7 @@ export const EffectsTab = () => {
           max={1}
           unit="%"
           onChange={(val) => setEffect("brightness", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
 
@@ -48,6 +49,7 @@ export const EffectsTab = () => {
           max={1}
           unit="%"
           onChange={(val) => setEffect("contrast", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
 
@@ -60,6 +62,7 @@ export const EffectsTab = () => {
           max={1}
           unit="%"
           onChange={(val) => setEffect("saturation", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
 
@@ -72,6 +75,7 @@ export const EffectsTab = () => {
           max={1}
           unit="°"
           onChange={(val) => setEffect("hue", val)}
+          format={(v) => Math.round(v * 180)}
         />
       )}
 
@@ -85,6 +89,7 @@ export const EffectsTab = () => {
           max={1}
           step={0.05}
           onChange={(val) => setEffect("bloom", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
       {vignette != null && (
@@ -95,6 +100,7 @@ export const EffectsTab = () => {
           max={1}
           step={0.05}
           onChange={(val) => setEffect("vignette", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
 
@@ -106,6 +112,7 @@ export const EffectsTab = () => {
           max={1}
           step={0.05}
           onChange={(val) => setEffect("grain", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
 
@@ -117,6 +124,7 @@ export const EffectsTab = () => {
           max={1}
           step={0.05}
           onChange={(val) => setEffect("chromaticAberration", val)}
+          format={(v) => Math.round(v * 100)}
         />
       )}
     </>

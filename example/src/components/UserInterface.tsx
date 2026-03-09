@@ -13,18 +13,32 @@ export default function UserInterface() {
   const isDay = useMainStore((state) => state.isDay);
   const toggleDay = useMainStore((state) => state.toggleDay);
 
+  const width = useMainStore((state) => state.width);
+  const height = useMainStore((state) => state.height);
+  const quality = useMainStore((state) => state.quality);
+  const format = useMainStore((state) => state.format);
+  const output = useMainStore((state) => state.output);
+
+  const returnType = output === "New Tab" ? "objectURL" : "file";
+
   const handleTakeScreenshot = async () => {
     if (!takeScreenshot || !photoModeOn) return;
 
-    const screenshot = await takeScreenshot({ returnType: "objectURL" });
+    const screenshot = await takeScreenshot({ width, height, format, quality, returnType });
 
     const a = document.createElement("a");
     a.download = `Screenshot.jpg`;
     if (typeof screenshot === "string") {
       window.open(screenshot, "_blank");
-      // screenshot.replace("image/jpeg", "image/octet-stream");
-      // a.href = screenshot;
-      // a.click();
+    } else if (screenshot instanceof File) {
+      const url = URL.createObjectURL(screenshot);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Screenshot";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   };
 

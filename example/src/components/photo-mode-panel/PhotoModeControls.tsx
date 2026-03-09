@@ -8,11 +8,22 @@ interface SliderControlProps {
   step?: number;
   unit?: string;
   onChange: (value: number) => void;
+  format?: (v: number) => number | string;
 }
 
-export const SliderControl = ({ label, value, min, max, step = 1, unit = "", onChange }: SliderControlProps) => {
+export const SliderControl = ({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  unit = "",
+  onChange,
+  format,
+}: SliderControlProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const percentage = ((value - min) / (max - min)) * 100;
+  const display = format ? format(value) : value;
 
   const getValueFromPointer = (clientX: number) => {
     const rect = trackRef.current!.getBoundingClientRect();
@@ -38,7 +49,7 @@ export const SliderControl = ({ label, value, min, max, step = 1, unit = "", onC
       <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] font-medium uppercase tracking-wider text-foreground/40">{label}</span>
         <span className="font-mono text-[10px] text-foreground/70 tabular-nums">
-          {typeof value === "number" && value % 1 !== 0 ? value.toFixed(1) : value}
+          {display}
           {unit}
         </span>
       </div>
