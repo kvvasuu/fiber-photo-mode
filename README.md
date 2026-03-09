@@ -57,6 +57,12 @@ const MyComponent = () => {
 
 More examples, API docs, and tutorials available here - https://github.com/kvvasuu/fiber-photo-mode/wiki
 
+## Support
+
+If this project helps you, consider supporting development.
+
+- GitHub Sponsors: https://github.com/sponsors/kvvasuu
+
 ## License
 
 MIT – free to use, modify, and expand.
