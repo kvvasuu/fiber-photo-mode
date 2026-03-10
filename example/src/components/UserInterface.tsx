@@ -2,6 +2,7 @@ import { usePhotoMode } from "fiber-photo-mode";
 import { Aperture, Camera, Eye, EyeOff, Moon, Space, Sun } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useMainStore } from "../store";
 import { PhotoModePanel } from "./photo-mode-panel/PhotoModePanel";
 import { positionVectors } from "./photo-mode-panel/tabs/OutputTab";
@@ -21,6 +22,8 @@ export default function UserInterface() {
   const output = useMainStore((state) => state.output);
   const overridePosition = useMainStore((state) => state.overridePosition);
   const overridePositionVec = useMainStore((state) => state.overridePositionVec);
+
+  const isMobile = useMediaQuery("(max-width: 639px)");
 
   const returnType = output === "New Tab" ? "objectURL" : "file";
 
@@ -124,7 +127,7 @@ export default function UserInterface() {
 
       <motion.button
         whileTap={{ scale: 0.9 }}
-        className="absolute top-6 right-6 z-50  group bg-background/50 border border-panel-border backdrop-blur-md rounded-lg p-2.5 transition-colors pointer-events-auto cursor-pointer"
+        className="absolute top-2 sm:top-6 right-2 sm:right-6 z-50 group bg-background/50 border border-panel-border backdrop-blur-md rounded-lg p-2 sm:p-2.5 transition-colors pointer-events-auto cursor-pointer"
         onClick={toggleDay}
         title={"Toogle day"}
         initial={{ opacity: 0, scale: 0 }}
@@ -141,14 +144,16 @@ export default function UserInterface() {
       </motion.button>
 
       {/* Bottom-right controls */}
-      <div className="absolute hidden sm:flex bottom-6 right-6 z-50  items-center gap-2">
+      <div
+        className={`absolute flex sm:bottom-6 right-2 sm:right-6 z-50 items-center gap-1 sm:gap-2 ${isMobile && (!uiVisible || !photoModeOn) ? "bottom-2" : "bottom-[calc(33dvh+0.5rem)]"}`}
+      >
         <LayoutGroup>
           <AnimatePresence initial={false}>
-            {photoModeOn && uiVisible && (
+            {photoModeOn && (uiVisible || isMobile) && (
               <motion.button
                 layout
                 whileTap={{ scale: 0.9 }}
-                className="group bg-background/50 border border-panel-border backdrop-blur-md relative rounded-lg p-2.5 transition-colors pointer-events-auto cursor-pointer"
+                className="group bg-background/50 border border-panel-border backdrop-blur-md relative rounded-lg p-2 sm:p-2.5 transition-colors pointer-events-auto cursor-pointer"
                 onClick={handleTakeScreenshot}
                 title="Take Screenshot"
                 initial={{ opacity: 0, scale: 0 }}
@@ -165,7 +170,7 @@ export default function UserInterface() {
               <motion.button
                 layout
                 whileTap={{ scale: 0.9 }}
-                className="group bg-background/50 border border-panel-border backdrop-blur-md relative rounded-lg p-2.5 transition-colors pointer-events-auto cursor-pointer"
+                className="group bg-background/50 border border-panel-border backdrop-blur-md relative rounded-lg p-2 sm:p-2.5 transition-colors pointer-events-auto cursor-pointer"
                 onClick={() => setUiVisible((prev) => !prev)}
                 title={uiVisible ? "Hide UI" : "Show UI"}
                 initial={{ opacity: 0, scale: 0 }}
@@ -186,7 +191,7 @@ export default function UserInterface() {
               <motion.button
                 layout
                 whileTap={{ scale: 0.9 }}
-                className="group bg-background/50 border border-panel-border backdrop-blur-md relative rounded-lg p-2.5 transition-colors pointer-events-auto cursor-pointer"
+                className="group bg-background/50 border border-panel-border backdrop-blur-md relative rounded-lg p-2 sm:p-2.5 transition-colors pointer-events-auto cursor-pointer"
                 onClick={() => togglePhotoMode()}
                 title={photoModeOn ? "Exit Photo Mode" : "Enter Photo Mode"}
                 initial={{ opacity: 0, scale: 0 }}

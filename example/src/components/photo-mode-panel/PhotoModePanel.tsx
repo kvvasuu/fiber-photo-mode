@@ -19,19 +19,19 @@ export const PhotoModePanel = () => {
   const [activeTab, setActiveTab] = useState<TabId>("camera");
 
   return (
-    <div className="fixed bottom-0 sm:bottom-20 right-0 sm:right-6 z-50 w-full sm:w-110 md:w-140 pointer-events-auto">
+    <div className="fixed bottom-0 right-0 z-50 w-full sm:w-110 md:w-140 pointer-events-auto h-[33dvh] sm:h-80 sm:bottom-20 sm:right-6">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="rounded-lg overflow-hidden border border-panel-border backdrop-blur-lg shadow-xl shadow-background/25 inset-shadow-2xs"
+        className="flex h-full flex-col sm:rounded-lg overflow-hidden border border-panel-border backdrop-blur-lg shadow-xl shadow-background/25 inset-shadow-2xs pb-4 sm:pb-0"
         style={{
           background: "linear-gradient(135deg, hsla(220,25%,10%,0.55), hsla(220,20%,8%,0.65))",
         }}
       >
         {/* Tab bar */}
-        <div className="flex items-center border-b border-foreground/5 px-1">
+        <div className="panel-scroll flex items-center border-b border-foreground/5 px-1 overflow-x-auto">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -67,7 +67,7 @@ export const PhotoModePanel = () => {
         </div>
 
         {/* Content */}
-        <div className="panel-scroll h-80 overflow-y-auto p-4">
+        <div className="panel-scroll flex-1 overflow-y-auto p-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
