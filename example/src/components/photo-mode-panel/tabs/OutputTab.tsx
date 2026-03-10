@@ -1,4 +1,7 @@
+import { Download, ExternalLink } from "lucide-react";
 import { Vector3 } from "three";
+import { useMediaQuery } from "../../../hooks/useMediaQuery";
+import { useViewport } from "../../../hooks/useViewport";
 import { useMainStore } from "../../../store";
 import { SectionLabel, SliderControl, SwitchControl } from "../PhotoModeControls";
 
@@ -23,8 +26,18 @@ export const positionVectors = [
   },
 ];
 
-const outputTypes = ["New Tab", "Download"];
-export type Output = (typeof outputTypes)[number];
+const outputTypes = [
+  {
+    name: "New Tab",
+    icon: <ExternalLink size={16} />,
+  },
+  {
+    name: "Download",
+    icon: <Download size={16} />,
+  },
+] as const;
+
+export type Output = (typeof outputTypes)[number]["name"];
 
 export const OutputTab = () => {
   const width = useMainStore((state) => state.width);
@@ -35,31 +48,53 @@ export const OutputTab = () => {
   const overridePosition = useMainStore((state) => state.overridePosition);
   const overridePositionVec = useMainStore((state) => state.overridePositionVec);
 
+  const isMobile = useMediaQuery("(max-width: 639px)");
+  const viewport = useViewport();
+
   return (
     <>
       <SectionLabel>Resolution</SectionLabel>
-      <div className="flex gap-1.5 mb-3 flex-wrap">
-        {presets.map((p) => (
+      <div className="flex justify-between gap-1.5">
+        <div className="flex justify-start gap-1.5 mb-3 flex-wrap">
           <button
-            key={p.label}
+            key={"viewport-ratio"}
             onClick={() => {
-              useMainStore.setState({ width: p.w, height: p.h });
+              useMainStore.setState({ width: viewport.width, height: viewport.height });
             }}
             className="rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
             style={{
-              background: width === p.w && height === p.h ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.15)",
-              color: width === p.w && height === p.h ? "hsl(220,25%,8%)" : "hsla(0,0%,95%,0.5)",
+              background:
+                width === viewport.width && height === viewport.height ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.15)",
+              color: width === viewport.width && height === viewport.height ? "hsl(220,25%,8%)" : "hsla(0,0%,95%,0.5)",
             }}
           >
-            {p.label}
+            Viewport
           </button>
-        ))}
+          {presets.map((p) => (
+            <button
+              key={p.label}
+              onClick={() => {
+                useMainStore.setState({ width: p.w, height: p.h });
+              }}
+              className="rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+              style={{
+                background: width === p.w && height === p.h ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.15)",
+                color: width === p.w && height === p.h ? "hsl(220,25%,8%)" : "hsla(0,0%,95%,0.5)",
+              }}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <span className="text-[10px] font-medium uppercase tracking-wider text-foreground/40">
+          {width / gcd(width, height)}:{height / gcd(width, height)}
+        </span>
       </div>
       <SliderControl
         label="Width"
         value={width}
         min={320}
-        max={7680}
+        max={isMobile ? 3840 : 7680}
         step={1}
         unit="px"
         onChange={(v) => useMainStore.setState({ width: v })}
@@ -68,7 +103,7 @@ export const OutputTab = () => {
         label="Height"
         value={height}
         min={320}
-        max={4320}
+        max={isMobile ? 2160 : 4320}
         step={1}
         unit="px"
         onChange={(v) => useMainStore.setState({ height: v })}
@@ -104,12 +139,22 @@ export const OutputTab = () => {
         />
       )}
 
-      <SectionLabel>Info</SectionLabel>
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-foreground/40">Aspect Ratio</span>
-        <span className="font-mono text-[10px] text-foreground/70 tabular-nums">
-          {width / gcd(width, height)}:{height / gcd(width, height)}
-        </span>
+      <SectionLabel>Output</SectionLabel>
+      <div className="flex gap-1.5 mb-3">
+        {outputTypes.map((o) => (
+          <button
+            key={o.name}
+            onClick={() => useMainStore.setState({ output: o.name })}
+            className="flex flex-row items-center gap-2 rounded-md px-3 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+            style={{
+              background: output === o.name ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.15)",
+              color: output === o.name ? "hsl(220,25%,8%)" : "hsla(0,0%,95%,0.5)",
+            }}
+          >
+            {o.icon}
+            {o.name}
+          </button>
+        ))}
       </div>
 
       <SectionLabel>Override Camera Position</SectionLabel>
@@ -135,23 +180,6 @@ export const OutputTab = () => {
           ))}
         </div>
       )}
-
-      <SectionLabel>Output</SectionLabel>
-      <div className="flex gap-1.5 mb-3">
-        {outputTypes.map((o) => (
-          <button
-            key={o}
-            onClick={() => useMainStore.setState({ output: o })}
-            className="rounded-md px-3 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-            style={{
-              background: output === o ? "hsl(200,85%,55%)" : "hsla(220,15%,50%,0.15)",
-              color: output === o ? "hsl(220,25%,8%)" : "hsla(0,0%,95%,0.5)",
-            }}
-          >
-            {o}
-          </button>
-        ))}
-      </div>
     </>
   );
 };
