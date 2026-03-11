@@ -69,7 +69,7 @@ export function AutoFocus({
   }, []);
 
   useEffect(() => {
-    if (!composer || !camera) return;
+    if (!composer) return;
 
     composer.addPass(depthPickingPass, 2);
     composer.addPass(copyPass, 3);
