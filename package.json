@@ -7,6 +7,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prebuild": "npm run clean",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
@@ -32,15 +34,15 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/postprocessing": "^3.0.4",
     "postprocessing": "^6.38.2",
-    "zustand": "^5.0.10"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@types/react": "^19.2.9",
-    "@types/three": "^0.182.0",
-    "typescript": "^5.0.4"
+    "@types/react": "^19.2.17",
+    "@types/three": ">=0.182.0",
+    "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "@react-three/fiber": "^9.0.0",
+    "@react-three/fiber": "^9.6.1",
     "react": "^19.0",
     "three": ">=0.182.0"
   }
