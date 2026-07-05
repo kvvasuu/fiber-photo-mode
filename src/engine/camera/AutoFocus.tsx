@@ -7,7 +7,7 @@ import { Vector3 } from "three";
 import { CameraStore, useCameraStore } from "../../store/CameraStore";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
 import { MAX_APERTURE, MIN_APERTURE } from "../../utils/constants";
-import { apertureToDOFParams } from "../../utils/functions";
+import { apertureToDOFParams, screenshotInProgress } from "../../utils/functions";
 
 interface AutoFocusPassHandle {
   dofRef: RefObject<DepthOfFieldEffect>;
@@ -93,6 +93,7 @@ export function AutoFocus({
       hitpointRef.current.copy(camera.position).addScaledVector(_cameraDir.current, focusDistance);
     } else {
       // AUTOFOCUS MODE: sample depth from screen center
+      if (screenshotInProgress) return;
       const ndc = ndcRef.current;
       ndc.x = 0; // center X in NDC
       ndc.y = 0; // center Y in NDC
