@@ -167,14 +167,22 @@ const bufferToOutput = async (
  * Creates and disposes WebGLRenderTarget internally
  */
 export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) => async (options?) => {
+  if (screenshotInProgress) {
+    throw new Error("[fiber-photo-mode] A screenshot capture is already in progress.");
+  }
+
   // Save current state
   const renderState = saveRenderState(gl, camera as PerspectiveCamera);
 
   // Determine screenshot parameters
-  const width = options?.width ?? renderState.prevSize.x;
-  const height = options?.height ?? renderState.prevSize.y;
+  const width = Math.round(options?.width ?? renderState.prevSize.x);
+  const height = Math.round(options?.height ?? renderState.prevSize.y);
   const format = options?.format ?? "jpeg";
   const quality = options?.quality ?? 0.95;
+
+  if (width <= 0 || height <= 0 || !Number.isFinite(width) || !Number.isFinite(height)) {
+    throw new Error(`[fiber-photo-mode] Invalid screenshot dimensions: ${width}x${height}`);
+  }
 
   try {
     // Create pixel buffer
@@ -195,7 +203,7 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
           options,
         });
       } catch (e) {
-        console.error("onBeforeScreenshot error", e);
+        console.error("[fiber-photo-mode] onBeforeScreenshot error", e);
       }
     }
 
@@ -213,7 +221,7 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
           options,
         });
       } catch (e) {
-        console.error("onAfterScreenshot error", e);
+        console.error("[fiber-photo-mode] onAfterScreenshot error", e);
       }
     }
 
