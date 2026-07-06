@@ -120,33 +120,35 @@ const restoreRenderState = (gl: WebGLRenderer, camera: PerspectiveCamera, state:
 };
 
 /**
- * Converts pixel buffer to canvas element
+ * Converts a raw pixel buffer into the requested output type.
  */
-const pixelsToCanvas = (buffer: Uint8Array, width: number, height: number): HTMLCanvasElement => {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
-  ctx.putImageData(new ImageData(new Uint8ClampedArray(buffer), width, height), 0, 0);
-  return canvas;
-};
-
-/**
- * Converts canvas to requested output type.
- */
-const canvasToOutput = async (
-  canvas: HTMLCanvasElement,
+const bufferToOutput = async (
+  buffer: Uint8Array,
+  width: number,
+  height: number,
   format: string,
   quality: number,
   returnType: ScreenshotOptions["returnType"] = "objectURL",
 ): Promise<HTMLCanvasElement | Blob | File | string> => {
+  const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height);
+  const bitmap = await createImageBitmap(imageData);
+
   if (returnType === "canvas") {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
     return canvas;
   }
 
-  const blob: Blob = await new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), `image/${format}`, quality),
-  );
+  const offscreen = new OffscreenCanvas(width, height);
+  const ctx = offscreen.getContext("2d")!;
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const blob = await offscreen.convertToBlob({ type: `image/${format}`, quality });
 
   switch (returnType) {
     case "blob":
@@ -232,8 +234,7 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
     flipY(buffer, width, height);
 
     // Convert to output format
-    const canvas = pixelsToCanvas(buffer, width, height);
-    return canvasToOutput(canvas, format, quality, options?.returnType);
+    return bufferToOutput(buffer, width, height, format, quality, options?.returnType);
   } catch (e) {
     // Attempt to restore state even on failure
     restoreRenderState(gl, camera as PerspectiveCamera, renderState);
