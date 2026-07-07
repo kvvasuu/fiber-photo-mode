@@ -12,6 +12,9 @@ import {
 import { ScreenshotOptions, TakeScreenshotFn } from "../../types";
 import { CapturePass } from "./../CapturePass";
 
+// Flag indicating if a screenshot capture is currently in progress
+export let screenshotInProgress = false;
+
 /**
  * Flips pixel buffer vertically (Y-axis)
  */
@@ -30,26 +33,11 @@ const flipY = (buffer: Uint8Array, width: number, height: number) => {
 };
 
 /**
- * Creates a WebGL render target for screenshot capture
- */
-const createRenderTarget = (gl: WebGLRenderer, width: number, height: number): WebGLRenderTarget<Texture> => {
-  const target = new WebGLRenderTarget(width, height, {
-    format: RGBAFormat,
-    type: UnsignedByteType,
-    colorSpace: gl.outputColorSpace as any,
-    samples: 4,
-    depthBuffer: true,
-  });
-  return target;
-};
-
-/**
  * Stores the current renderer and camera state
  */
 type RenderState = {
   prevTarget: WebGLRenderTarget<Texture> | null;
   prevSize: Vector2;
-  prevPixelRatio: number;
   prevAspect: number;
 };
 
@@ -59,42 +47,41 @@ type RenderState = {
 const saveRenderState = (gl: WebGLRenderer, camera: PerspectiveCamera): RenderState => ({
   prevTarget: gl.getRenderTarget(),
   prevSize: gl.getSize(new Vector2()),
-  prevPixelRatio: gl.getPixelRatio(),
   prevAspect: camera.aspect,
 });
 
 /**
- * Configures camera aspect ratio for screenshot
- */
-const configureCamera = (camera: PerspectiveCamera, width: number, height: number) => {
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-};
-
-/**
- * Renders scene to FBO with or without post-processing
+ * Creates a render target, renders the scene into it with or without post-processing, and returns the FBO.
  */
 const renderToFBO = (
   gl: WebGLRenderer,
   scene: Scene,
   camera: PerspectiveCamera,
-  fbo: WebGLRenderTarget<Texture>,
+  width: number,
+  height: number,
   composer?: EffectComposerImpl | null,
-) => {
+): WebGLRenderTarget<Texture> => {
+  const fbo = new WebGLRenderTarget(width, height, {
+    format: RGBAFormat,
+    type: UnsignedByteType,
+    colorSpace: gl.outputColorSpace as any,
+    depthBuffer: false,
+  });
+
   if (composer) {
-    // Use EffectComposer to render with post-processing
     const prevRenderToScreen = composer.passes?.map((p: any) => p?.renderToScreen);
     const prevComposerSize = new Vector2(composer.outputBuffer.width, composer.outputBuffer.height);
-
-    const capturePass = new CapturePass(fbo);
+    const capturePass = new CapturePass(fbo, false);
 
     try {
-      composer.setSize(fbo.width, fbo.height, false);
+      composer.inputBuffer.setSize(width, height);
+      composer.outputBuffer.setSize(width, height);
+      // Resize all passes and disable renderToScreen in a single loop.
+      for (const pass of composer.passes) {
+        pass.setSize(width, height);
+        pass.renderToScreen = false;
+      }
       composer.addPass(capturePass);
-
-      composer.passes.forEach((pass) => {
-        if (pass) pass.renderToScreen = false;
-      });
 
       composer.render();
     } finally {
@@ -109,13 +96,18 @@ const renderToFBO = (
         }
       }
 
-      composer.setSize(prevComposerSize.x, prevComposerSize.y, false);
+      composer.inputBuffer.setSize(prevComposerSize.x, prevComposerSize.y);
+      composer.outputBuffer.setSize(prevComposerSize.x, prevComposerSize.y);
+      for (const pass of composer.passes) {
+        pass.setSize(prevComposerSize.x, prevComposerSize.y);
+      }
     }
   } else {
-    // Direct rendering without post-processing
     gl.setRenderTarget(fbo);
     gl.render(scene, camera);
   }
+
+  return fbo;
 };
 
 /**
@@ -124,39 +116,39 @@ const renderToFBO = (
 const restoreRenderState = (gl: WebGLRenderer, camera: PerspectiveCamera, state: RenderState) => {
   camera.aspect = state.prevAspect;
   camera.updateProjectionMatrix();
-  gl.setPixelRatio(state.prevPixelRatio);
-  gl.setSize(state.prevSize.x, state.prevSize.y, false);
   gl.setRenderTarget(state.prevTarget);
 };
 
 /**
- * Converts pixel buffer to canvas element
+ * Converts a raw pixel buffer into the requested output type.
  */
-const pixelsToCanvas = (buffer: Uint8Array, width: number, height: number): HTMLCanvasElement => {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
-  ctx.putImageData(new ImageData(new Uint8ClampedArray(buffer), width, height), 0, 0);
-  return canvas;
-};
-
-/**
- * Converts canvas to requested output type.
- */
-const canvasToOutput = async (
-  canvas: HTMLCanvasElement,
+const bufferToOutput = async (
+  buffer: Uint8Array,
+  width: number,
+  height: number,
   format: string,
   quality: number,
   returnType: ScreenshotOptions["returnType"] = "objectURL",
 ): Promise<HTMLCanvasElement | Blob | File | string> => {
+  const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height);
+  const bitmap = await createImageBitmap(imageData);
+
   if (returnType === "canvas") {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
     return canvas;
   }
 
-  const blob: Blob = await new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), `image/${format}`, quality),
-  );
+  const offscreen = new OffscreenCanvas(width, height);
+  const ctx = offscreen.getContext("2d")!;
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const blob = await offscreen.convertToBlob({ type: `image/${format}`, quality });
 
   switch (returnType) {
     case "blob":
@@ -175,35 +167,30 @@ const canvasToOutput = async (
  * Creates and disposes WebGLRenderTarget internally
  */
 export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) => async (options?) => {
+  if (screenshotInProgress) {
+    throw new Error("[fiber-photo-mode] A screenshot capture is already in progress.");
+  }
+
   // Save current state
   const renderState = saveRenderState(gl, camera as PerspectiveCamera);
 
   // Determine screenshot parameters
-  const width = options?.width ?? renderState.prevSize.x;
-  const height = options?.height ?? renderState.prevSize.y;
+  const width = Math.round(options?.width ?? renderState.prevSize.x);
+  const height = Math.round(options?.height ?? renderState.prevSize.y);
   const format = options?.format ?? "jpeg";
   const quality = options?.quality ?? 0.95;
 
+  if (width <= 0 || height <= 0 || !Number.isFinite(width) || !Number.isFinite(height)) {
+    throw new Error(`[fiber-photo-mode] Invalid screenshot dimensions: ${width}x${height}`);
+  }
+
   try {
-    // Ensure pixel ratio is 1 for consistent results
-    gl.setPixelRatio(1);
-    gl.setSize(width, height, false);
-
-    const pixelSize = new Vector2();
-    gl.getDrawingBufferSize(pixelSize);
-
-    // Output dimensions
-    const outputWidth = pixelSize.x;
-    const outputHeight = pixelSize.y;
-
     // Create pixel buffer
-    const buffer = new Uint8Array(outputWidth * outputHeight * 4);
+    const buffer = new Uint8Array(width * height * 4);
 
-    // Create render target for this screenshot
-    const fbo = createRenderTarget(gl, outputWidth, outputHeight);
-
-    // Configure camera
-    configureCamera(camera as PerspectiveCamera, outputWidth, outputHeight);
+    // Configure camera for screenshot dimensions
+    (camera as PerspectiveCamera).aspect = width / height;
+    (camera as PerspectiveCamera).updateProjectionMatrix();
 
     // Call onBeforeScreenshot callback if provided
     if (options?.onBeforeScreenshot) {
@@ -216,12 +203,12 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
           options,
         });
       } catch (e) {
-        console.error("onBeforeScreenshot error", e);
+        console.error("[fiber-photo-mode] onBeforeScreenshot error", e);
       }
     }
 
     // Render to FBO
-    renderToFBO(gl, scene, camera as PerspectiveCamera, fbo, composer);
+    const fbo = renderToFBO(gl, scene, camera as PerspectiveCamera, width, height, composer);
 
     // Call onAfterScreenshot callback if provided
     if (options?.onAfterScreenshot) {
@@ -234,25 +221,28 @@ export const takeScreenshot: TakeScreenshotFn = (gl, scene, camera, composer) =>
           options,
         });
       } catch (e) {
-        console.error("onAfterScreenshot error", e);
+        console.error("[fiber-photo-mode] onAfterScreenshot error", e);
       }
     }
 
-    // Read pixels from FBO
-    gl.readRenderTargetPixels(fbo, 0, 0, outputWidth, outputHeight, buffer);
-
-    // Restore previous render state
+    // Restore render state before readback.
     restoreRenderState(gl, camera as PerspectiveCamera, renderState);
+
+    screenshotInProgress = true;
+    try {
+      await gl.readRenderTargetPixelsAsync(fbo, 0, 0, width, height, buffer);
+    } finally {
+      screenshotInProgress = false;
+    }
 
     // Cleanup render target
     fbo.dispose();
 
     // Flip Y-axis
-    flipY(buffer, outputWidth, outputHeight);
+    flipY(buffer, width, height);
 
     // Convert to output format
-    const canvas = pixelsToCanvas(buffer, outputWidth, outputHeight);
-    return canvasToOutput(canvas, format, quality, options?.returnType);
+    return bufferToOutput(buffer, width, height, format, quality, options?.returnType);
   } catch (e) {
     // Attempt to restore state even on failure
     restoreRenderState(gl, camera as PerspectiveCamera, renderState);
