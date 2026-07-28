@@ -1,3 +1,4 @@
+import { shallow } from "zustand/shallow";
 import { usePhotoModeEffectsStore } from "../store/EffectsStore";
 import type { EffectKey } from "../types";
 
@@ -29,33 +30,31 @@ export type UsePhotoModeEffectsReturn = {
 };
 
 /**
- * Hook to access and control photo mode effects
- * @returns Object with effect values and control functions
+ * Hook to access and control photo mode effects.
+ *
+ * Accepts an optional selector (like `useThree`) so consumers that only need e.g. a
+ * single setter can subscribe to just that, instead of re-rendering on every effect
+ * value change: `usePhotoModeEffects((state) => state.setEffect)`.
+ *
+ * @returns Selected slice of the derived effects state (the whole object if no selector is given)
  */
-export function usePhotoModeEffects() {
-  const hue = usePhotoModeEffectsStore((state) => state.hue);
-  const saturation = usePhotoModeEffectsStore((state) => state.saturation);
-  const brightness = usePhotoModeEffectsStore((state) => state.brightness);
-  const contrast = usePhotoModeEffectsStore((state) => state.contrast);
-  const chromaticAberration = usePhotoModeEffectsStore((state) => state.chromaticAberration);
-  const bloom = usePhotoModeEffectsStore((state) => state.bloom);
-  const vignette = usePhotoModeEffectsStore((state) => state.vignette);
-  const grain = usePhotoModeEffectsStore((state) => state.grain);
+export function usePhotoModeEffects<T = UsePhotoModeEffectsReturn>(
+  selector: (state: UsePhotoModeEffectsReturn) => T = (state) => state as unknown as T,
+) {
+  return usePhotoModeEffectsStore((state) => {
+    const { enabledEffects } = state;
 
-  const enabledEffects = usePhotoModeEffectsStore((state) => state.enabledEffects);
-  const setEffect = usePhotoModeEffectsStore((state) => state.setEffect);
-  const resetEffects = usePhotoModeEffectsStore((state) => state.resetEffects);
-
-  return {
-    hue: enabledEffects.hueSaturation ? hue : undefined,
-    saturation: enabledEffects.hueSaturation ? saturation : undefined,
-    brightness: enabledEffects.brightnessContrast ? brightness : undefined,
-    contrast: enabledEffects.brightnessContrast ? contrast : undefined,
-    chromaticAberration: enabledEffects.chromaticAberration ? chromaticAberration : undefined,
-    bloom: enabledEffects.bloom ? bloom : undefined,
-    vignette: enabledEffects.vignette ? vignette : undefined,
-    grain: enabledEffects.grain ? grain : undefined,
-    setEffect: setEffect as UsePhotoModeEffectsReturn["setEffect"],
-    resetEffects,
-  };
+    return selector({
+      hue: enabledEffects.hueSaturation ? state.hue : undefined,
+      saturation: enabledEffects.hueSaturation ? state.saturation : undefined,
+      brightness: enabledEffects.brightnessContrast ? state.brightness : undefined,
+      contrast: enabledEffects.brightnessContrast ? state.contrast : undefined,
+      chromaticAberration: enabledEffects.chromaticAberration ? state.chromaticAberration : undefined,
+      bloom: enabledEffects.bloom ? state.bloom : undefined,
+      vignette: enabledEffects.vignette ? state.vignette : undefined,
+      grain: enabledEffects.grain ? state.grain : undefined,
+      setEffect: state.setEffect,
+      resetEffects: state.resetEffects,
+    });
+  }, shallow);
 }
