@@ -11,8 +11,8 @@ export default function App() {
 
   const [showOverlay, setShowOverlay] = useState(false);
 
-  const { togglePhotoMode } = usePhotoMode();
-  const { setFocalLength } = usePhotoModeCamera();
+  const togglePhotoMode = usePhotoMode((state) => state.togglePhotoMode);
+  const setFocalLength = usePhotoModeCamera((state) => state.setFocalLength);
 
   useEffect(() => {
     setFocalLength(14);
