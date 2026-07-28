@@ -11,11 +11,11 @@ export function Effects() {
 
   return (
     <>
-      {enabledEffects.hueSaturation && <HueSaturation />}
-      {enabledEffects.brightnessContrast && <BrightnessContrast />}
-      {enabledEffects.vignette && <Vignette />}
       {enabledEffects.chromaticAberration && <ChromaticAberration />}
       {enabledEffects.bloom && <Bloom />}
+      {enabledEffects.vignette && <Vignette />}
+      {enabledEffects.hueSaturation && <HueSaturation />}
+      {enabledEffects.brightnessContrast && <BrightnessContrast />}
       {enabledEffects.grain && <Grain />}
     </>
   );
