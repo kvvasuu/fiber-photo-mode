@@ -71,12 +71,13 @@ const renderToFBO = (
   if (composer) {
     const prevRenderToScreen = composer.passes?.map((p: any) => p?.renderToScreen);
     const prevComposerSize = new Vector2(composer.outputBuffer.width, composer.outputBuffer.height);
+    const depthRenderTarget = (composer as any).depthRenderTarget as WebGLRenderTarget | null | undefined;
     const capturePass = new CapturePass(fbo, false);
 
     try {
       composer.inputBuffer.setSize(width, height);
       composer.outputBuffer.setSize(width, height);
-      // Resize all passes and disable renderToScreen in a single loop.
+      depthRenderTarget?.setSize(width, height);
       for (const pass of composer.passes) {
         pass.setSize(width, height);
         pass.renderToScreen = false;
@@ -98,6 +99,7 @@ const renderToFBO = (
 
       composer.inputBuffer.setSize(prevComposerSize.x, prevComposerSize.y);
       composer.outputBuffer.setSize(prevComposerSize.x, prevComposerSize.y);
+      depthRenderTarget?.setSize(prevComposerSize.x, prevComposerSize.y);
       for (const pass of composer.passes) {
         pass.setSize(prevComposerSize.x, prevComposerSize.y);
       }
