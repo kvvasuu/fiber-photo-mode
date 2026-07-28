@@ -38,13 +38,13 @@
     "@react-three/postprocessing": "^3.0.4",
     "@types/react": "^19.2.17",
     "@types/three": ">=0.182.0",
-    "postprocessing": "^6.39.3",
+    "postprocessing": "^6.39.4",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
     "@react-three/fiber": "^9.6.1",
     "@react-three/postprocessing": "^3.0.4",
-    "postprocessing": "^6.39.3",
+    "postprocessing": "^6.39.4",
     "react": "^19.0",
     "three": ">=0.182.0"
   }
