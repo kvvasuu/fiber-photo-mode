@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "prebuild": "npm run clean",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "build": "tsc"
   },
   "files": [
@@ -39,7 +39,8 @@
     "@types/react": "^19.2.17",
     "@types/three": ">=0.182.0",
     "postprocessing": "^6.39.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "@react-three/fiber": "^9.6.1",
