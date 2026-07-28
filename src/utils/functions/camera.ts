@@ -124,33 +124,6 @@ export function apertureToDOFParams(aperture: number): { focusRange: number; bok
 
   return { focusRange, bokehScale };
 }
-/**
- * Maps camera aperture (f-stop) to perceptual Depth of Field range (non-linear).
- *
- * Smaller f-stop (wider aperture) → shallow DOF → small focusRange
- * Larger f-stop (narrower aperture) → deep DOF → large focusRange
- *
- * Non-linear mapping gives a more realistic progression, approaching large range for high f-stops.
- *
- * @param aperture - F-stop value (clamped to [MIN_APERTURE, MAX_APERTURE])
- * @returns Focus range in world units for DepthOfFieldEffect
- */
-export function apertureToFocusRange(aperture: number): number {
-  const minRange = 0.5; // shallow DOF
-  const maxRange = 200.0; // deep DOF (practically infinity)
-
-  const clamped = Math.max(MIN_APERTURE, Math.min(aperture, MAX_APERTURE));
-
-  // normalize to [0,1]
-  const t = (clamped - MIN_APERTURE) / (MAX_APERTURE - MIN_APERTURE);
-
-  // exponential function: exp(base * t) - 1
-  const base = 4.0; // controls growth rate
-  const exponentialT = (Math.exp(base * t) - 1) / (Math.exp(base) - 1);
-
-  return minRange + exponentialT * (maxRange - minRange);
-}
-
 export function makeCameraSnapshot(camera: Camera): UserCameraSnapshot {
   camera.updateMatrixWorld(true);
 
