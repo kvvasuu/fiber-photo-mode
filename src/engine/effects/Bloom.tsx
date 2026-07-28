@@ -1,21 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { BloomEffect } from "postprocessing";
+import { useDispose } from "../../hooks/useDispose";
 import { usePhotoModeEffectsStore } from "../../store/EffectsStore";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
 import { mapEffectValue } from "../../utils/functions";
 
-export function Bloom({ effect }: { effect: BloomEffect }) {
+export function Bloom() {
   const bloom = usePhotoModeEffectsStore((state) => state.bloom);
   const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
 
-  useEffect(() => {
-    if (!effect) return;
+  const effect = useMemo(() => new BloomEffect({ intensity: 0 }), []);
+  useDispose(effect);
 
+  useEffect(() => {
     effect.intensity = photoModeOn ? mapEffectValue(bloom, "bloom") : 0;
   }, [effect, bloom, photoModeOn]);
-
-  if (!effect) return null;
 
   return <primitive object={effect} />;
 }

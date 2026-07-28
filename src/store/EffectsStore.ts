@@ -27,8 +27,7 @@ export type PhotoModeEffectsStore = {
 // Equality check to prevent unnecessary re-renders
 const equalityFn = <T>(a: T, b: T) => a === b;
 
-// Throttle updates to max 60fps
-let lastSetTime: number = 0;
+const lastSetTimes = new Map<EffectKey, number>();
 
 export const usePhotoModeEffectsStore = createWithEqualityFn<PhotoModeEffectsStore>(
   (set) => ({
@@ -54,8 +53,9 @@ export const usePhotoModeEffectsStore = createWithEqualityFn<PhotoModeEffectsSto
 
     setEffect: (effectName, value) => {
       const now = performance.now();
+      const lastSetTime = lastSetTimes.get(effectName) ?? 0;
       if (now - lastSetTime < 16) return; // max 60fps update
-      lastSetTime = now;
+      lastSetTimes.set(effectName, now);
 
       const def = EFFECT_DEFINITIONS[effectName];
       const clamped = Math.min(def.max, Math.max(def.min, value));

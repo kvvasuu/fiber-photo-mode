@@ -1,22 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { NoiseEffect } from "postprocessing";
+import { useDispose } from "../../hooks/useDispose";
 import { usePhotoModeEffectsStore } from "../../store/EffectsStore";
 import { usePhotoModeStore } from "../../store/PhotoModeStore";
 import { mapEffectValue } from "../../utils/functions";
 
-export function Grain({ effect }: { effect: NoiseEffect }) {
+export function Grain() {
   const grain = usePhotoModeEffectsStore((state) => state.grain);
 
   const photoModeOn = usePhotoModeStore((state) => state.photoModeOn);
 
-  useEffect(() => {
-    if (!effect) return;
+  const effect = useMemo(() => new NoiseEffect({ premultiply: true }), []);
+  useDispose(effect);
 
+  useEffect(() => {
     effect.blendMode.opacity.value = photoModeOn ? mapEffectValue(grain, "grain") : 0;
   }, [effect, grain, photoModeOn]);
-
-  if (!effect) return null;
 
   return <primitive object={effect} />;
 }
