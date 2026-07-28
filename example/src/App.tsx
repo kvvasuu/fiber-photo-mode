@@ -42,7 +42,7 @@ export default function App() {
     <>
       <Canvas gl={{ powerPreference: "high-performance" }} camera={{ position: [-7, 5, -8], fov: 80, far: 100 }}>
         <PhotoModeControls makeDefault restoreOnClose ref={controlsRef} smoothTime={0.7} maxDistance={20} />
-        <PhotoMode />
+        <PhotoMode enabledEffects={{ bloom: true }} />
         <AutoFocus initialAperture={18} initialDOFEnabled={true} initialAutoFocus={true} />
 
         <Suspense fallback={null}>
