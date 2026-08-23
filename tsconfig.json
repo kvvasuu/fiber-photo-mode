@@ -9,6 +9,7 @@
     "outDir": "dist",
     "jsx": "react-jsx",
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "pretty": true,
     "removeComments": true,
