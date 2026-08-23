@@ -27,15 +27,15 @@ jobs:
         with:
           node-version: 24
           cache: "npm"
-          cache-dependency-path: example/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: example
 
-      - name: Build
+      - name: Build library
         run: npm run build
-        working-directory: example
+
+      - name: Build example
+        run: npm run build --workspace=example
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
