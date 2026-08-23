@@ -1,0 +1,4 @@
+packages:
+  - "example"
+minimumReleaseAgeExclude:
+  - '@react-three/postprocessing@3.1.0'

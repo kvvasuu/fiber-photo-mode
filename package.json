@@ -4,6 +4,7 @@
   "author": "Łukasz Kwas (https://github.com/kvvasuu)",
   "description": "A React Three Fiber component to add photo mode functionality to your 3D scenes.",
   "license": "MIT",
+  "packageManager": "pnpm@11.15.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,9 +15,6 @@
   },
   "files": [
     "dist"
-  ],
-  "workspaces": [
-    "example"
   ],
   "keywords": [
     "react",
@@ -35,6 +33,7 @@
   "type": "module",
   "dependencies": {
     "@react-three/drei": "^10.7.7",
+    "maath": "^0.10.8",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
