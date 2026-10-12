@@ -135,7 +135,7 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
   const autoFocusPass = useRef<EffectPass | null>(null);
 
   useEffect(() => {
-    if (!camera) return;
+    if (!composer || !camera) return;
 
     const { bokehScale, focusRange } = apertureToDOFParams(aperture);
 
@@ -150,34 +150,28 @@ const AutoFocusPass = forwardRef<AutoFocusPassHandle, {}>((_props, ref) => {
     const maskPass = (dofEffect as any).maskPass;
     maskPass.maskFunction = MaskFunction.MULTIPLY_RGB_SET_ALPHA;
 
+    const pass = new EffectPass(camera, dofEffect);
+    pass.name = "AutoFocusPass";
+    pass.enabled = photoModeOn && DOFEnabled;
+    composer.addPass(pass, 1);
+
     dofRef.current = dofEffect;
-    autoFocusPass.current = new EffectPass(camera, dofEffect);
-    autoFocusPass.current.enabled = photoModeOn && DOFEnabled;
+    autoFocusPass.current = pass;
 
     return () => {
-      dofEffect.dispose();
-      autoFocusPass.current?.dispose();
+      composer.removePass(pass);
+      pass.dispose(); // also disposes dofEffect
+
+      dofRef.current = null;
+      autoFocusPass.current = null;
     };
-  }, [camera]);
+  }, [composer, camera]);
 
   useEffect(() => {
-    if (!composer || !autoFocusPass.current) return;
+    if (!autoFocusPass.current) return;
 
     autoFocusPass.current.enabled = photoModeOn && DOFEnabled;
   }, [DOFEnabled, photoModeOn]);
-
-  useEffect(() => {
-    if (!composer || !autoFocusPass.current) return;
-
-    autoFocusPass.current.name = "AutoFocusPass";
-    composer.addPass(autoFocusPass.current, 1);
-
-    return () => {
-      if (autoFocusPass.current) {
-        composer.removePass(autoFocusPass.current);
-      }
-    };
-  }, [composer, autoFocusPass.current]);
 
   useEffect(() => {
     if (!dofRef.current) return;
