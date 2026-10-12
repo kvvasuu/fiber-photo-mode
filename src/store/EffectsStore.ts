@@ -27,8 +27,6 @@ export type PhotoModeEffectsStore = {
 // Equality check to prevent unnecessary re-renders
 const equalityFn = <T>(a: T, b: T) => a === b;
 
-const lastSetTimes = new Map<EffectKey, number>();
-
 export const usePhotoModeEffectsStore = createWithEqualityFn<PhotoModeEffectsStore>(
   (set) => ({
     hue: EFFECT_DEFINITIONS.hue.default, // -PI to PI
@@ -52,11 +50,6 @@ export const usePhotoModeEffectsStore = createWithEqualityFn<PhotoModeEffectsSto
     setEnabledEffects: (effects) => set({ enabledEffects: effects }),
 
     setEffect: (effectName, value) => {
-      const now = performance.now();
-      const lastSetTime = lastSetTimes.get(effectName) ?? 0;
-      if (now - lastSetTime < 16) return; // max 60fps update
-      lastSetTimes.set(effectName, now);
-
       const def = EFFECT_DEFINITIONS[effectName];
       const clamped = Math.min(def.max, Math.max(def.min, value));
       set({ [effectName]: clamped });
